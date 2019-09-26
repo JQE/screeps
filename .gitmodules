@@ -1,0 +1,3 @@
+[submodule "Screep-Typescript-declarations"]
+	path = Screep-Typescript-declarations
+	url = https://github.com/sfrommer/ScreepsStarterVisualStudioCode.git
