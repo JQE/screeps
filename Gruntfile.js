@@ -86,6 +86,18 @@ module.exports = function(grunt) {
                     dest: private_directory,
                 }
             },
+            backup: {
+                options: {
+                  src: private_directory+'/',
+                  dest: './backup/',
+                }
+            },
+            restore: {
+              options: {
+                src: './backup/',
+                dest: private_directory,
+              }
+            }
         },
         jsbeautifier: {
             modify: {
@@ -106,7 +118,8 @@ module.exports = function(grunt) {
     })
 
     grunt.registerTask('default',  ['clean', 'copy:screeps', 'file_append:versioning', 'screeps']);
-    grunt.registerTask('private',  ['clean', 'copy:screeps', 'file_append:versioning', 'rsync:private']);
+    grunt.registerTask('private',  ['clean', 'copy:screeps', 'file_append:versioning', 'rsync:backup', 'rsync:private']);
+    grunt.registerTask('restore',  ['clean', 'copy:screeps', 'rsync:restore']);
 
     grunt.registerTask('test',     ['jsbeautifier:verify']);
     grunt.registerTask('pretty',   ['jsbeautifier:modify']);

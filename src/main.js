@@ -1,19 +1,58 @@
-var spawnController = require('creeps_spawn.controller');
-var creepController = require('creeps_creep.controller');
-var towerController = require('tower.controller');
-var labController = require('lab.controller');
-var linkController = require('link.controller');
+// import modules
+require('Prototypes_Creep');
+require('Prototypes_Link');
+require('Prototypes_Tower');
+require('Prototypes_Spawn');
+require('Prototypes_Lab');
 
-module.exports.loop = function () {
-
-    for(var name in Memory.creeps) {
-        if(!Game.creeps[name]) {
+module.exports.loop = function() {
+    // check for memory entries of died creeps by iterating over Memory.creeps
+    for (let name in Memory.creeps) {
+        // and checking if the creep is still alive
+        if (Game.creeps[name] == undefined) {
+            // if not, delete the memory entry
             delete Memory.creeps[name];
         }
     }
 
-    for (var name in Game.spawns) {
-        var spawn = Game.spawns[name];
+    // for each creeps
+    /**@type {Array.<Creep>} */
+    for (let name in Game.creeps) {
+        // run creep logic
+        Game.creeps[name].runRole();
+    }
+
+    /**@type {Array.<StructureLink>} */
+    var links = _.filter(Game.structures, s => s.structureType == STRUCTURE_LINK);
+    for (let link of links) {
+        link.Send();
+    }
+    
+    /**@type {Array.<StructureLab>} */
+    var labs = _.filter(Game.structures, s => s.structureType == STRUCTURE_LAB);
+    for (let lab of labs) {
+        lab.React();
+    }
+
+    // find all towers
+    /**@type {Array.<StructureTower} */
+    var towers = _.filter(Game.structures, s => s.structureType == STRUCTURE_TOWER);
+    // for each tower
+    for (let tower of towers) {
+        // run tower logic
+        if (tower.defend() == false) {
+            if (tower.fix() == false) {
+                tower.medic();
+            }
+        }
+    }
+
+    // for each spawn
+    /**@type {<Array.<StructureSpawn>} */
+    for (let spawnName in Game.spawns) {
+        // run spawn logic
+        var spawn = Game.spawns[spawnName];
+        spawn.spawnCreepsIfNecessary();
         if (spawn.spawning) {
             var spawningCreep = Game.creeps[spawn.spawning.name];
             spawn.room.visual.text(
@@ -23,19 +62,4 @@ module.exports.loop = function () {
                 {align: 'left', opacity: 0.8});
         }
     }
-    
-    for (var name in Game.rooms) {
-        var room = Game.rooms[name];
-        var creeps = room.find(FIND_MY_CREEPS);
-        spawnController.run(creeps, room);
-        creepController.run(creeps, room);
-        towerController.run(room);
-        linkController.run(room);
-        labController.run(room);
-        room.visual.text(
-            
-            );
-    }
-    
-   
-}
+};

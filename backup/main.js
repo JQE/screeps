@@ -51,15 +51,6 @@ module.exports.loop = function() {
     /**@type {<Array.<StructureSpawn>} */
     for (let spawnName in Game.spawns) {
         // run spawn logic
-        var spawn = Game.spawns[spawnName];
-        spawn.spawnCreepsIfNecessary();
-        if (spawn.spawning) {
-            var spawningCreep = Game.creeps[spawn.spawning.name];
-            spawn.room.visual.text(
-                '🛠️' + spawningCreep.memory.role,
-                spawn.pos.x + 1,
-                spawn.pos.y,
-                {align: 'left', opacity: 0.8});
-        }
+        Game.spawns[spawnName].spawnCreepsIfNecessary();
     }
 };
