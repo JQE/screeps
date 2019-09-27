@@ -20,9 +20,16 @@ var roleUpgrader = {
             }
         }
         else {
-            creep.getEnergy(true, true);
+            creep.getEnergy(true, false);
         }
-    }
+    },
+	parts: function(isBase) {
+	    if (isBase) {
+	        return [CARRY,CARRY,MOVE,MOVE,WORK];
+	    } else {
+	        return [WORK,WORK,WORK,CARRY,CARRY,MOVE,MOVE];
+	    }
+	}
 };
 
 module.exports = roleUpgrader;

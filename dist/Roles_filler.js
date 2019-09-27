@@ -1,5 +1,4 @@
 module.exports = {
-
     /** @param {Creep} creep **/
     run: function(creep) {
         if (creep.memory.working && creep.carry.energy == 0) {
@@ -28,40 +27,27 @@ module.exports = {
                this.findTarget(creep);
             }
         } else {
-            creep.getEnergy(true, true);
+            creep.getEnergy(true, false);
         }
     },
     /** @param {Creep} creep */
-	findTarget: function(creep) {
-        var target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+	findTarget: function(creep) {        
+        var towers = creep.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: (structure) => {
-                return (structure.structureType == STRUCTURE_EXTENSION ||
-                        structure.structureType == STRUCTURE_SPAWN) && structure.energy < structure.energyCapacity;
+                return (structure.structureType == STRUCTURE_TOWER) && structure.energy < structure.energyCapacity-100;
             }
         });
-        if(target) {
-            creep.memory.structure = target.id;
-        } else {
-            var lab = creep.pos.findClosestByPath(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_LAB && s.energy < s.energyCapacity});
-            if (lab) {
-                creep.memory.structure = lab.id;
-            } else {
-                var towers = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-                    filter: (structure) => {
-                        return (structure.structureType == STRUCTURE_TOWER) && structure.energy < structure.energyCapacity-100;
-                    }
-                });
-                if (towers) {
-                    creep.memory.structure = towers.id;
-                }
-            }
+        if (towers) {
+            creep.memory.structure = towers.id;
         }
+            
+        
     },
 	parts: function(isBase) {
 	    if (isBase) {
 	        return [CARRY,CARRY,MOVE,MOVE,WORK];
 	    } else {
-	        return [CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE];
+	        return [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE];
 	    }
 	}
 };

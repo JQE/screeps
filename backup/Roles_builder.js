@@ -16,17 +16,22 @@ module.exports = {
         }
 
         if(creep.memory.working) {
-            var target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
+            var target = creep.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
             if (target) {
                 if(creep.build(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
+                    creep.moveTo(target);
                 }
-            } else {
-                roleUpgrader.run(creep);
             }
         }
         else {
-            creep.getEnergy(true,true);
+            creep.getEnergy(true,false);
         }
+	},
+	parts: function(isBase) {
+	    if (isBase) {
+	        return [CARRY,CARRY,MOVE,MOVE,WORK];
+	    } else {
+	        return [WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE];
+	    }
 	}
 };

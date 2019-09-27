@@ -4,6 +4,7 @@ require('Prototypes_Link');
 require('Prototypes_Tower');
 require('Prototypes_Spawn');
 require('Prototypes_Lab');
+require('Prototypes_Room');
 
 module.exports.loop = function() {
     // check for memory entries of died creeps by iterating over Memory.creeps
@@ -48,18 +49,14 @@ module.exports.loop = function() {
     }
 
     // for each spawn
-    /**@type {<Array.<StructureSpawn>} */
     for (let spawnName in Game.spawns) {
         // run spawn logic
         var spawn = Game.spawns[spawnName];
-        spawn.spawnCreepsIfNecessary();
-        if (spawn.spawning) {
-            var spawningCreep = Game.creeps[spawn.spawning.name];
-            spawn.room.visual.text(
-                '🛠️' + spawningCreep.memory.role,
-                spawn.pos.x + 1,
-                spawn.pos.y,
-                {align: 'left', opacity: 0.8});
-        }
+        spawn.spawnCreepsIfNecessary();        
+    }
+
+    for (let roomName in Game.rooms) {
+        var room = Game.rooms[roomName];
+        room.foreman();
     }
 };

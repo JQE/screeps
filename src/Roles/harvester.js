@@ -42,7 +42,7 @@ module.exports = {
         if(target) {
             creep.memory.structure = target.id;
         } else {
-            var lab = creep.pos.findClosestByPath(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_LAB});
+            var lab = creep.pos.findClosestByPath(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_LAB && s.energy < s.energyCapacity});
             if (lab) {
                 creep.memory.structure = lab.id;
             } else {
@@ -53,10 +53,15 @@ module.exports = {
                 });
                 if (towers) {
                     creep.memory.structure = towers.id;
-                } else {
-                    creep.memory.structure = creep.room.storage;
                 }
             }
         }
-    }
+    },
+	parts: function(isBase) {
+	    if (isBase) {
+	        return [CARRY,CARRY,MOVE,MOVE,WORK];
+	    } else {
+	        return [CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE];
+	    }
+	}
 };

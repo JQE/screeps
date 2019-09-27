@@ -2,29 +2,29 @@ var roleCourier = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
-        if (creep.memory.active && creep.carry[creep.memory.resource] == 0) {
-            creep.memory.active = false;
+        if (creep.memory.working && (creep.carry[creep.memory.resource] == undefined || creep.carry[creep.memory.resource] == 0)) {
+            creep.memory.working = false;
             creep.memory.structure = undefined;
             creep.say('🔄 collecting');
         }
 
-        if (!creep.memory.active && creep.carry[creep.memory.resource] == creep.carryCapacity) {
-            creep.memory.active = true;
+        if (!creep.memory.working && creep.carry[creep.memory.resource] == creep.carryCapacity) {
+            creep.memory.working = true;
             creep.memory.structure = undefined;
             creep.say('🛢️ transporting')
         }
 
-        if (creep.memory.active) {            
+        if (creep.memory.working) {            
             if (creep.memory.remote == creep.room.name) {
                 var Lab = Game.getObjectById(creep.room.memory.lab.remote);
-                if (Lab && Lab.mineralAmount < Lab.mineralCapacity) {
+                if (Lab) {
                     var status = creep.transfer(Lab, creep.memory.resource);
                     if (status == ERR_NOT_IN_RANGE) {
                         creep.moveTo(Lab);
                     }
                 }
             } else {
-                var exit = creep.room.findExitTo(Lab);
+                var exit = creep.room.findExitTo(creep.memory.remote);
                 creep.moveTo(creep.pos.findClosestByRange(exit)); 
             }
         } else {
@@ -32,7 +32,7 @@ var roleCourier = {
                 var exit = creep.room.findExitTo(creep.memory.home);
                 creep.moveTo(creep.pos.findClosestByRange(exit));
             } else {
-                var extractor = Game.findObjectById(creep.memory.source);
+                var extractor = Game.getObjectById(creep.memory.source);
                 let container = extractor.pos.findInRange(FIND_STRUCTURES, 1, {
                     filter: s => s.structureType == STRUCTURE_CONTAINER
                 })[0];
@@ -43,7 +43,11 @@ var roleCourier = {
                 }
             }
         }
+    },
+	parts: function(isBase) {
+	    return [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE];
 	}
+    
 };
 
 module.exports = roleCourier;

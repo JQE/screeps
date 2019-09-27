@@ -15,77 +15,59 @@ var roleTransport = {
         }
 
         if (creep.memory.working) {
-            // find closest spawn, extension or tower which is not full
-            var structure = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
-                // the second argument for findClosestByPath is an object which takes
-                // a property called filter which can be a function
-                // we use the arrow operator to define it
-                filter: (s) => (s.structureType == STRUCTURE_SPAWN
-                             || s.structureType == STRUCTURE_EXTENSION
-                             || s.structureType == STRUCTURE_TOWER)
-                             && s.energy < s.energyCapacity
-            });
-
-            if (structure == undefined) {
-                structure = creep.room.storage;
-            }
-
-            // if we found one
-            if (structure != undefined) {
+            if (creep.room.storage) {
                 // try to transfer energy, if it is not in range
-                if (creep.transfer(structure, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                if (creep.transfer(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     // move towards it
-                    creep.moveTo(structure);
+                    creep.moveTo(creep.room.storage);
                 }
             }
         } else {
-            var stones = creep.room.find(FIND_TOMBSTONES, {
+            var container = {};
+            var dropped = creep.room.find(FIND_DROPPED_RESOURCES);
+            if (dropped && dropped.length > 0) {
+                for (let drop of dropped) {
+                    var containers = drop.pos.findInRange(FIND_STRUCTURES, 0);
+                    if (containers == undefined || containers.length <= 0) {
+                        if(creep.pickup(drop) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(drop);
+                            return;
+                        }
+                    }
+                }
+            }
+            container = creep.pos.findClosestByPath(FIND_TOMBSTONES, {
                 filter: (stone) => {
-                    return stone.store[RESOURCE_ENERGY] > 0 
+                    return stone.store[RESOURCE_ENERGY] > creep.carryCapacity 
                 }
             });
-            if (stones.length > 0) {
-                if(creep.withdraw(stones[0], RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                    creep.moveTo(stones[0]);
+
+            if (container == undefined) {
+                var link = Game.getObjectById(creep.room.memory.link.target);
+                if (link.energy > creep.carryCapacity) {
+                    container = link;
                 }
-            } else {
-                // find closest container
-                let container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-                    filter: s => {                        
-                        if (creep.room.memory.link != undefined) {
-                            var link = creep.room.memory.link;                            
-                        }
-                        if (s.StructureType == STRUCTURE_CONTAINER) {
-                            if (link) {
-                                return (s.id != link.container && s.store[RESOURCE_ENERGY] > 0);
-                            } else {
-                                return s.store[RESOURCE_ENERGY] > 0;
-                            }
-                        } else if (s.StructureType == STRUCTURE_LINK) {
-                            if (link) {
-                                return (s.id == link.target && s.store[RESOURCE_ENERGY] > 0);
-                            } else {
-                                return s.store[RESOURCE_ENERGY] > 0;
-                            }
-                        }
-                                 
-                    }
+            }
+
+            if (container == undefined) {
+                container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+                    filter: s => s.structureType == STRUCTURE_CONTAINER && s.store[RESOURCE_ENERGY] > creep.carryCapacity
                 });
+            }
 
-                if (container == undefined) {
-                    container = creep.room.storage;
+            // if one was found
+            if (container != undefined) {
+                // try to withdraw energy, if the container is not in range
+                if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    // move towards it
+                    creep.moveTo(container);
                 }
-
-                // if one was found
-                if (container != undefined) {
-                    // try to withdraw energy, if the container is not in range
-                    if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                        // move towards it
-                        creep.moveTo(container);
-                    }
-                }
-            }            
+            }
+                       
         }
+	},
+	parts: function(isBase) {
+	    return [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE];
 	}
 };
 

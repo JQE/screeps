@@ -25,7 +25,10 @@ var roleRunner = {
             var exit = creep.room.findExitTo(creep.memory.home);
             creep.moveTo(creep.pos.findClosestByRange(exit));
         }
-    }
+    },
+	parts: function(isBase) {
+	    return [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE];
+	}
 }
 
 module.exports = roleRunner;

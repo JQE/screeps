@@ -14,7 +14,14 @@ var roleDefender = {
                 creep.rangedAttack(closestHostile);
             }
         }
-    }
+    },
+	parts: function(isBase) {
+	    if (isBase) {
+	        return [ATTACK,ATTACK,ATTACK,MOVE,MOVE,MOVE,TOUGH,TOUGH,TOUGH];
+	    } else {
+	        return [ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,RANGED_ATTACK,RANGED_ATTACK,RANGED_ATTACK,MOVE,MOVE,MOVE,MOVE,TOUGH,TOUGH,MOVE,MOVE];
+	    }
+	}
 }
 
 module.exports = roleDefender;

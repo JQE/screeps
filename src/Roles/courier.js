@@ -36,6 +36,9 @@ var roleCourier = {
                 }
             }
         }
+	},
+	parts: function(isBase) {
+	    return [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE];
 	}
 };
 

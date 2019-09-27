@@ -21,5 +21,8 @@ module.exports = {
                 creep.moveTo(container);
             }
         }
-    }
+    },
+	parts: function(isBase) {
+	    return [WORK,WORK,WORK,WORK,WORK,MOVE];
+	}
 };

@@ -18,6 +18,13 @@ var roleHealer = {
                 creep.rangedHeal(closestAlly);
             }
         }
+    },
+    parts: function(isBase) {
+        if (isBase) {
+            return [HEAL,MOVE,MOVE];
+        } else {
+            return [HEAL,HEAL,HEAL,HEAL,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE];
+        }
     }
 }
 

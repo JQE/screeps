@@ -12,8 +12,10 @@ module.exports = {
         "healer":        require('Roles_healer'),
         "linker":        require('Roles_linker'),
         "remotecourier": require('Roles_remotecourier'),
-        "courier":       require('Roles_courier')
+        "courier":       require('Roles_courier'),
+        "filler":        require('Roles_filler'),
+        "attacker":      require('Roles_attacker')
     },general : [
-    "harvester", "transport", "claimer", "upgrader", "builder", "mechanic", "linker", "courier"
+        "harvester", "transport", "linker", "filler", "courier", "claimer", "upgrader", "builder", "mechanic"
     ]
 }
