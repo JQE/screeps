@@ -42,7 +42,7 @@ var roleTransport = {
                 }
             });
 
-            if (container == undefined) {
+            if (container == undefined && creep.memory.link) {
                 var link = Game.getObjectById(creep.room.memory.link.target);
                 if (link.energy > creep.carryCapacity) {
                     container = link;
