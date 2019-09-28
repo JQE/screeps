@@ -23,7 +23,7 @@ Creep.prototype.getEnergy =
                     this.moveTo(this.room.storage);
                 }
             } else {
-                container = this.pos.findClosestByPath(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_CONTAINER && s.store[RESOURCE_ENERGY] > 0});
+                container = this.pos.findClosestByPath(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_CONTAINER && s.store[RESOURCE_ENERGY] > this.carryCapacity});
                 if (container) {
                     if (this.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                         this.moveTo(container);

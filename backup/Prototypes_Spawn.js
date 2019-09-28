@@ -139,7 +139,6 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                     }
                     else {
                         var useSource = (level < 4);
-                        console.log("Spawn: "+this.name+" source: "+useSource);
                         name = this.createCustomCreep(role, useSource, level);
                         break;
                     }
