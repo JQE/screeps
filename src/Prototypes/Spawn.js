@@ -1,5 +1,20 @@
 var Common = require('Common_Constants');
 
+StructureSpawn.prototype.roomUpgrade = 
+    function() {
+        let room = this.room;
+        if (room.memory.level != room.controller.level) {
+            if (room.controller.level == 4) {
+                if (this.room.storage) {
+                    this.minCreeps.transport = 3;
+                    room.memory.level = room.controller.level; 
+                }
+            } else {
+                room.memory.level = room.controller.level;
+            }   
+        }
+    }
+
 // create a new function for StructureSpawn
 StructureSpawn.prototype.spawnCreepsIfNecessary =
     function () {
@@ -55,7 +70,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
         // if no harvesters are left AND either no miners or no lorries are left
         //  create a backup creep
         else if (numberOfCreeps['harvester'] == 0) {            
-            name = this.createCustomCreep('harvester', true, level);            
+            name = this.createCustomCreep('harvester', true, 1);            
         }
         // if no backup creep is required
         else {
@@ -75,8 +90,8 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                     if (containers.length > 0) {
                         // spawn a miner
                         name = this.createMiner(source.id, level);
-                        break;
                     }
+                    break;
                 }
             }
 
@@ -129,7 +144,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                     } else if ( role == "builder") {
                         var sites = this.room.find(FIND_MY_CONSTRUCTION_SITES);
                         if (sites.length > 0 ) {
-                            var useSource = (level < 4);
+                            var useSource = (level < 4 || room.storage == undefined);
                             name = this.createCustomCreep(role, useSource, level);
                             break;
                         }
@@ -138,7 +153,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                         break;
                     }
                     else {
-                        var useSource = (level < 4);
+                        var useSource = (level < 4 || room.storage == undefined);
                         name = this.createCustomCreep(role, useSource, level);
                         break;
                     }

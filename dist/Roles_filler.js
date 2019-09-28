@@ -44,7 +44,7 @@ module.exports = {
         
     },
 	parts: function(level) {
-	    if (level < 4) {
+	    if (level < 3) {
 	        return [CARRY,CARRY,MOVE,MOVE,WORK];
 	    } else {
 	        return [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE];

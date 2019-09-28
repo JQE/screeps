@@ -1,4 +1,4 @@
-var roleUpgrader = require('Roles_upgrader');
+var roleMechanic = require('Roles_mechanic');
 
 module.exports = {
 
@@ -22,7 +22,7 @@ module.exports = {
                     creep.moveTo(target);
                 }
             } else {
-                roleUpgrader.run(creep);
+                roleMechanic.run(creep);
             }
         }
         else {
@@ -30,7 +30,7 @@ module.exports = {
         }
 	},
 	parts: function(level) {
-	    if (level < 4) {
+	    if (level < 3) {
 	        return [CARRY,CARRY,MOVE,MOVE,WORK];
 	    } else {
 	        return [WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE];

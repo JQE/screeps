@@ -52,7 +52,8 @@ module.exports.loop = function() {
     for (let spawnName in Game.spawns) {
         // run spawn logic
         var spawn = Game.spawns[spawnName];
-        spawn.spawnCreepsIfNecessary();        
+        spawn.spawnCreepsIfNecessary();  
+        spawn.roomUpgrade(); 
     }
 
     for (let roomName in Game.rooms) {
