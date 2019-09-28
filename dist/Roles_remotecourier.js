@@ -44,7 +44,7 @@ var roleCourier = {
             }
         }
     },
-	parts: function(isBase) {
+	parts: function(level) {
 	    return [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE];
 	}
     

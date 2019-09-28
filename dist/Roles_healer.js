@@ -19,8 +19,8 @@ var roleHealer = {
             }
         }
     },
-    parts: function(isBase) {
-        if (isBase) {
+    parts: function(level) {
+        if (level < 4) {
             return [HEAL,MOVE,MOVE];
         } else {
             return [HEAL,HEAL,HEAL,HEAL,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE];

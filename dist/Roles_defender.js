@@ -15,8 +15,8 @@ var roleDefender = {
             }
         }
     },
-	parts: function(isBase) {
-	    if (isBase) {
+	parts: function(level) {
+	    if (level < 4) {
 	        return [ATTACK,ATTACK,ATTACK,MOVE,MOVE,MOVE,TOUGH,TOUGH,TOUGH];
 	    } else {
 	        return [ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,RANGED_ATTACK,RANGED_ATTACK,RANGED_ATTACK,MOVE,MOVE,MOVE,MOVE,TOUGH,TOUGH,MOVE,MOVE];

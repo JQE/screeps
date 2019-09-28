@@ -57,11 +57,14 @@ module.exports = {
             }
         }
     },
-	parts: function(isBase) {
-	    if (isBase) {
+	parts: function(level ) {
+	    if (level < 4) {
 	        return [CARRY,CARRY,MOVE,MOVE,WORK];
-	    } else {
-	        return [CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE];
-	    }
+        }
+        if (level == 6) {
+            return [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE]
+        }
+	    return [CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE];
+	    
 	}
 };

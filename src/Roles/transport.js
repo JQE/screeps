@@ -66,7 +66,10 @@ var roleTransport = {
                        
         }
 	},
-	parts: function(isBase) {
+	parts: function(level) {
+        if (level < 4) {
+            return [WORK,MOVE,CARRY];
+        }
 	    return [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE];
 	}
 };

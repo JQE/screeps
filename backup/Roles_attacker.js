@@ -8,7 +8,7 @@ module.exports = {
             }
         }
     },
-	parts: function(isBase) {
+	parts: function(level) {
         var body = [];
         for (let i =0 ; i < 6; i++) {
             body.push(TOUGH);

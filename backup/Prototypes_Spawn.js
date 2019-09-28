@@ -5,7 +5,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
     function () {
         /** @type {Room} */
         let room = this.room;
-
+        let level = room.controller.level;
         if (this.spawning) {
             var spawningCreep = Game.creeps[this.spawning.name];
             room.visual.text(
@@ -29,30 +29,33 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
         for (let role of Object.keys(Common.roles)) {
             numberOfCreeps[role] = _.sum(creepsInRoom, (c) => c.memory.role == role);
         }
+        if (numberOfCreeps == undefined || numberOfCreeps.length == 0 || this.memory.minCreeps == undefined) {
+            return;
+        }
         let name = undefined;
 
         let enemies = room.find(FIND_HOSTILE_CREEPS);
 
         // If we are being attacked spawn a defender
         if (enemies.length > numberOfCreeps['defender']) {
-            name  = this.createDefender();
+            name  = this.createDefender(level);
             return;
         } 
         // If we have a defender spawn a healer for it.
         else if (numberOfCreeps['defender'] > numberOfCreeps['healer'] || numberOfCreeps['attacker']*2 > numberOfCreeps['healer']) {
-            name = this.createHealer();
+            name = this.createHealer(level);
             return;
         } 
 
         var powerbank = room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_POWER_BANK});
-        if (powerbank && powerbank.length > numberOfCreeps['attacker']) {
-            name = this.createAttacker();
+        if (powerbank && powerbank.length > numberOfCreeps['attacker'] && level > 5) {
+            name = this.createAttacker(level);
             return;
         }
         // if no harvesters are left AND either no miners or no lorries are left
         //  create a backup creep
         else if (numberOfCreeps['harvester'] == 0) {            
-            name = this.createCustomCreep('harvester', true);            
+            name = this.createCustomCreep('harvester', true, level);            
         }
         // if no backup creep is required
         else {
@@ -67,10 +70,11 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                     let containers = source.pos.findInRange(FIND_STRUCTURES, 1, {
                         filter: s => s.structureType == STRUCTURE_CONTAINER
                     });
+                    
                     // if there is a container next to the source
                     if (containers.length > 0) {
                         // spawn a miner
-                        name = this.createMiner(source.id);
+                        name = this.createMiner(source.id, level);
                         break;
                     }
                 }
@@ -86,7 +90,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                     // if there is a container next to the source
                     if (containers.length > 0) {
                         // spawn a miner
-                        name = this.createMiner(source.id);
+                        name = this.createMiner(source.id, level);
                         break;
                     }
                 }
@@ -99,11 +103,19 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                 // check for claim order
                 if (role == 'claimer' && this.memory.claimRoom != undefined) {
                     // try to spawn a claimer
-                    name = this.createClaimer(this.memory.claimRoom);
+                    name = this.createClaimer(this.memory.claimRoom, level);
                     // if that worked
                     if (name != undefined && _.isString(name)) {
                         // delete the claim order
                         delete this.memory.claimRoom;
+                    }
+                }
+                if (role == 'starter' && this.memory.startRoom != undefined) {
+                    var starters = _.filter(Game.creeps, (c) => {return c.memory.role == "starter"});
+                    if (starters.length < 4) {
+                        name = this.createStarter(this.memory.startRoom, this.room.name, level);
+                        
+                        break;
                     }
                 }
                 // if no claim order was found, check other roles
@@ -111,13 +123,14 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                     if (role == "courier") {
                         var lab = Game.getObjectById(this.room.memory.lab.local);
                         if (lab && lab.mineralAmount < lab.mineralCapacity) {
-                            name = this.createTransport(role);
+                            name = this.createTransport(role, level);
                             break;
                         }
                     } else if ( role == "builder") {
                         var sites = this.room.find(FIND_MY_CONSTRUCTION_SITES);
                         if (sites.length > 0 ) {
-                            name = this.createCustomCreep(role, false);
+                            var useSource = (level < 4);
+                            name = this.createCustomCreep(role, useSource, level);
                             break;
                         }
                     } else if (role == 'transport' || role == 'linker') {
@@ -125,7 +138,9 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                         break;
                     }
                     else {
-                        name = this.createCustomCreep(role, false);
+                        var useSource = (level < 4);
+                        console.log("Spawn: "+this.name+" source: "+useSource);
+                        name = this.createCustomCreep(role, useSource, level);
                         break;
                     }
                 }
@@ -147,7 +162,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                             filter: s => s.structureType == STRUCTURE_CONTAINER
                         });
                         if (containers.length > 0) {
-                            name = this.createRemoteCourier(room.name, roomName, mineral, extractor.id);
+                            name = this.createRemoteCourier(room.name, roomName, mineral, extractor.id, level);
                             break;
                         }
                     }
@@ -165,7 +180,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                         c.memory.role == 'runner' && c.memory.target == roomName)
     
                     if (numberOfRunners[roomName] < this.memory.minRuners[roomName]) {
-                        name = this.createRunner(room.name, roomName);
+                        name = this.createRunner(room.name, roomName, level);
                         break;
                     }
                 }
@@ -175,8 +190,8 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
 
 // create a new function for StructureSpawn
 StructureSpawn.prototype.createCustomCreep =
-    function (roleName, useSource) {
-        var body = Common.roles[roleName].parts(roleName);
+    function (roleName, useSource, level) {
+        var body = Common.roles[roleName].parts(level);
 
         // create creep with the created body and the given role
         var name = roleName + Game.time;
@@ -188,9 +203,9 @@ StructureSpawn.prototype.createCustomCreep =
 
     // create a new function for StructureSpawn
 StructureSpawn.prototype.createRemoteCourier =
-function ( home, target, mineral, source) {
+function ( home, target, mineral, source, level) {
     // create a body with the 2 carry per move
-    var body = Common.roles["remotecourier"].parts(false);
+    var body = Common.roles["remotecourier"].parts(level);
 
     // create creep with the created body
     var name = "RemoteCourier"+Game.time;
@@ -208,9 +223,9 @@ function ( home, target, mineral, source) {
 
 // create a new function for StructureSpawn
 StructureSpawn.prototype.createRunner =
-    function (home, target) {
+    function (home, target, level) {
         // create a body with the 2 carry per move
-        var body = Common.roles["runner"].parts(false);
+        var body = Common.roles["runner"].parts(level);
 
         // create creep with the created body
         var name = "Runner"+Game.time;
@@ -225,9 +240,9 @@ StructureSpawn.prototype.createRunner =
     };
 
 StructureSpawn.prototype.createDefender =
-    function () {
+    function (level) {
         
-        var body = Common.roles["defender"].parts(false);
+        var body = Common.roles["defender"].parts(level);
 
         // create creep with the created body and the role 'lorry'
         var name = "Defender"+Game.time;
@@ -237,9 +252,9 @@ StructureSpawn.prototype.createDefender =
     };
 
 StructureSpawn.prototype.createAttacker =
-    function () {
+    function (level) {
         
-        var body = Common.roles["attacker"].parts(false);
+        var body = Common.roles["attacker"].parts(level);
 
         // create creep with the created body and the role 'lorry'
         var name = "Attacker"+Game.time;
@@ -249,8 +264,8 @@ StructureSpawn.prototype.createAttacker =
     };
 
 StructureSpawn.prototype.createHealer =
-    function () {
-        var body = Common.roles["healer"].parts(false);
+    function (level) {
+        var body = Common.roles["healer"].parts(level);
 
         // create creep with the created body and the role 'lorry'
         var name = "Healer"+Game.time;
@@ -262,28 +277,39 @@ StructureSpawn.prototype.createHealer =
 
 // create a new function for StructureSpawn
 StructureSpawn.prototype.createClaimer =
-    function (target) {
+    function (target, level) {
         var name = "Claimer"+Game.time;
         if (this.spawnCreep([CLAIM, MOVE], name, {memory: { role: 'claimer', target: target }}) == OK) {
             return name;
         }
     };
 
+StructureSpawn.prototype.createStarter =
+    function (target, home, level) {
+        var body = Common.roles["starter"].parts(level);
+        var name = "Starter"+Game.time;
+        let status = this.spawnCreep(body, name, {memory: {role: 'starter', working: false, target: target, home: home}})
+        if (status == OK) {
+            return name;
+        }    
+    }
+
 // create a new function for StructureSpawn
 StructureSpawn.prototype.createMiner =
-    function (sourceId) {
-        var parts = Common.roles["miner"].parts(false);
+    function (sourceId, level) {
+        var parts = Common.roles["miner"].parts(level);
         var name = "Miner"+Game.time;
-        if (this.spawnCreep(parts, name, { memory: { role: 'miner', sourceId: sourceId }}) == OK) {
+        var status = this.spawnCreep(parts, name, { memory: { role: 'miner', sourceId: sourceId }});
+        if (status == OK) {
             return name;
         }
     };
 
 // create a new function for StructureSpawn
 StructureSpawn.prototype.createTransport =
-    function (role) {
+    function (role, level) {
         // create a body with twice as many CARRY as MOVE parts
-        var parts = Common.roles[role].parts(false);
+        var parts = Common.roles[role].parts(level);
 
         // create creep with the created body and the role 'transport'
         var name = role+Game.time;

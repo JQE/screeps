@@ -22,7 +22,11 @@ module.exports = {
             }
         }
     },
-	parts: function(isBase) {
-	    return [WORK,WORK,WORK,WORK,WORK,MOVE];
+	parts: function(level) {
+        if (level < 2) {
+            return [WORK,MOVE,CARRY];
+        }
+        return [WORK,WORK,WORK,WORK,WORK,MOVE];
+        
 	}
 };

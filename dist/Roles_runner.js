@@ -22,11 +22,17 @@ var roleRunner = {
                 }
             }            
         } else {
-            var exit = creep.room.findExitTo(creep.memory.home);
-            creep.moveTo(creep.pos.findClosestByRange(exit));
+            if (creep.room.name != creep.memory.home) {
+                var exit = creep.room.findExitTo(creep.memory.home);
+                creep.moveTo(creep.pos.findClosestByRange(exit));
+            } else {
+                if(creep.withdraw(creep.room.storage) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(creep.room.storage);
+                }
+            }
         }
     },
-	parts: function(isBase) {
+	parts: function(level) {
 	    return [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE];
 	}
 }

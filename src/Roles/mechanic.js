@@ -40,8 +40,8 @@ var roleMechanic = {
             creep.getEnergy(true, false);
         }
 	},
-	parts: function(isBase) {
-	    if (isBase) {
+	parts: function(level) {
+	    if (level < 4) {
 	        return [WORK,CARRY,CARRY,MOVE,MOVE];
 	    } else {
 	        return [WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE];
