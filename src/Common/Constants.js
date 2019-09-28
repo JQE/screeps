@@ -12,6 +12,7 @@ module.exports = {
         "healer":        require('Roles_healer'),
         "linker":        require('Roles_linker'),
         "remotecourier": require('Roles_remotecourier'),
+        "remoteminer":   require('Roles_remoteminer'),
         "courier":       require('Roles_courier'),
         "filler":        require('Roles_filler'),
         "attacker":      require('Roles_attacker'),

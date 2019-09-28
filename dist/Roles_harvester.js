@@ -17,10 +17,10 @@ module.exports = {
         if (creep.memory.working) {
             if (creep.memory.structure) {
                 var structure = Game.getObjectById(creep.memory.structure);
-                if (structure && structure.energy < structure.energyCapacity) {                    
-                    if (creep.transfer(structure, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(structure);
-                    }
+                if (structure && structure.energy < structure.energyCapacity) {
+                        if (creep.transfer(structure, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(structure);
+                        }
                 } else {
                     this.findTarget(creep);
                 }

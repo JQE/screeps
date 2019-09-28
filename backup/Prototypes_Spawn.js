@@ -9,6 +9,18 @@ StructureSpawn.prototype.roomUpgrade =
                     this.minCreeps.transport = 3;
                     room.memory.level = room.controller.level; 
                 }
+            } else if (room.controller.level == 1) {
+                this.minCreeps = { 
+                    harvester	:	4,
+                    upgrader	:	4,
+                    builder	:	3,
+                    transport	:	0,
+                    mechanic	:	3,
+                    linker	:	0,
+                    courier	:	0,
+                    filler	:	0
+                };     
+                room.memory.level = room.controller.level;           
             } else {
                 room.memory.level = room.controller.level;
             }   
@@ -160,6 +172,20 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                 }
             }
         }
+
+        /** @type {Object.<string,number>} */
+        let numberOfRemoteMiners = {};
+        if (name == undefined) {
+            for (let roomName in this.memory.minRemoteMiners) {
+                numberOfRemoteMiners[roomName] = _.sum(Game.creeps, (c) => 
+                    c.memory.role == "remoteminer" && c.memory.remote == roomName)
+                if (numberOfRemoteMiners[roomName] < this.memory.minRemoteMiners[roomName]) {
+                    
+                   name = this.createRemoteMiner(room.name, roomName, level);
+                }
+            }
+        }
+        
         // if none of the above caused a spawn command check for remoteCouriers
         // They send lab resources to be combined.
         /** @type {Object.<string, number>} */
@@ -213,6 +239,23 @@ StructureSpawn.prototype.createCustomCreep =
             return name;
         }
 
+    };
+
+StructureSpawn.prototype.createRemoteMiner =
+    function ( home, target, level) {
+        // create a body with the 2 carry per move
+        var body = Common.roles["remoteminer"].parts(level);
+    
+        // create creep with the created body
+        var name = "RemoteMiner"+Game.time;
+        if (this.spawnCreep(body, name, {memory: {
+            role: 'remoteminer',
+            home: home,
+            remote: target,
+            working: false
+        }}) == OK) {
+            return name;
+        }
     };
 
     // create a new function for StructureSpawn
