@@ -4,10 +4,14 @@ StructureSpawn.prototype.roomUpgrade =
     function() {
         let room = this.room;
         if (room.memory.level != room.controller.level) {
-            if (room.controller.level == 4 && this.room.storage) {
-                this.minCreeps.transport = 3;
-            }
-            room.memory.level = room.controller.level;            
+            if (room.controller.level == 4) {
+                if (this.room.storage) {
+                    this.minCreeps.transport = 3;
+                    room.memory.level = room.controller.level; 
+                }
+            } else {
+                room.memory.level = room.controller.level;
+            }   
         }
     }
 
