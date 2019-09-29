@@ -5,6 +5,7 @@ require('Prototypes_Tower');
 require('Prototypes_Spawn');
 require('Prototypes_Lab');
 require('Prototypes_Room');
+require('Prototypes_Source');
 
 module.exports.loop = function() {
     // check for memory entries of died creeps by iterating over Memory.creeps
@@ -59,5 +60,6 @@ module.exports.loop = function() {
     for (let roomName in Game.rooms) {
         var room = Game.rooms[roomName];
         room.foreman();
+        room.maintain();
     }
 };

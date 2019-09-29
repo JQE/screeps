@@ -33,7 +33,7 @@ module.exports = {
 	    if (level < 3) {
 	        return [CARRY,CARRY,MOVE,MOVE,WORK];
 	    } else {
-	        return [WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE];
+	        return [WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE];
 	    }
 	}
 };

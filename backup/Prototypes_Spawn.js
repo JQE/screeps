@@ -3,14 +3,29 @@ var Common = require('Common_Constants');
 StructureSpawn.prototype.roomUpgrade = 
     function() {
         let room = this.room;
+        if (room.memory.level == undefined) {
+            room.memory.level = 0;
+        }
         if (room.memory.level != room.controller.level) {
             if (room.controller.level == 4) {
                 if (this.room.storage) {
-                    this.minCreeps.transport = 3;
+                    this.memory.minCreeps.transport = 3;
                     room.memory.level = room.controller.level; 
                 }
             } else if (room.controller.level == 1) {
-                this.minCreeps = { 
+                this.memory.minCreeps = { 
+                    harvester	:	2,
+                    upgrader	:	2,
+                    builder	:	1,
+                    transport	:	0,
+                    mechanic	:	1,
+                    linker	:	0,
+                    courier	:	0,
+                    filler	:	0
+                };     
+                room.memory.level = room.controller.level;           
+            } else if (room.controller.level == 2) {
+                this.memory.minCreeps = { 
                     harvester	:	4,
                     upgrader	:	4,
                     builder	:	3,
@@ -19,8 +34,28 @@ StructureSpawn.prototype.roomUpgrade =
                     linker	:	0,
                     courier	:	0,
                     filler	:	0
-                };     
-                room.memory.level = room.controller.level;           
+                };   
+                var sources = room.find(FIND_SOURCES);
+                for (let source of sources) {
+                    if (room.lookAt(source.x-1, source.y) == 0) {
+                        room.createConstructionSite(source.x-1, source.y, STRUCTURE_CONTAINER);
+                    } else if (room.lookAt(source.x+1, source.y)== 0) {
+                        room.createConstructionSite(source.x+1, source.y, STRUCTURE_CONTAINER);
+                    } else if (room.lookAt(source.x, source.y-1) == 0) {
+                        room.createConstructionSite(source.x, source.y-1, STRUCTURE_CONTAINER);
+                    } else if (room.lookAt(source.x, source.y+1) == 0) {
+                        room.createConstructionSite(source.x, source.y+1, STRUCTURE_CONTAINER);
+                    } else if (room.lookAt(source.x-1, source.y-1) == 0) {                        
+                        room.createConstructionSite(source.x-1, source.y-1, STRUCTURE_CONTAINER);
+                    } else if (room.lookAt(source.x+1, source.y-1) == 0) {                        
+                        room.createConstructionSite(source.x+1, source.y-1, STRUCTURE_CONTAINER);
+                    } else if (room.lookAt(source.x+1, source.y+1) == 0) {                        
+                        room.createConstructionSite(source.x+1, source.y+1, STRUCTURE_CONTAINER);
+                    } else if (room.lookAt(source.x-1, source.y+1) == 0) {                        
+                        room.createConstructionSite(source.x-1, source.y+1, STRUCTURE_CONTAINER);
+                    }
+                }
+                room.memory.level = room.controller.level;  
             } else {
                 room.memory.level = room.controller.level;
             }   
@@ -62,6 +97,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
         let name = undefined;
 
         let enemies = room.find(FIND_HOSTILE_CREEPS);
+        var powerbank = room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_POWER_BANK});
 
         // If we are being attacked spawn a defender
         if (enemies.length > numberOfCreeps['defender']) {
@@ -69,7 +105,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
             return;
         } 
         // If we have a defender spawn a healer for it.
-        else if (numberOfCreeps['defender'] > numberOfCreeps['healer'] || numberOfCreeps['attacker']*2 > numberOfCreeps['healer']) {
+        else if ((numberOfCreeps['defender'] > numberOfCreeps['healer'] && enemies > 0) || (numberOfCreeps['attacker']*2 > numberOfCreeps['healer']  && powerbank)) {
             name = this.createHealer(level);
             return;
         } 
@@ -88,6 +124,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
         else {
             // check if all sources have miners
             let sources = room.find(FIND_SOURCES);
+            var hasContainers = false;
             // iterate over all sources
             for (let source of sources) {
                 // if the source has no miner
@@ -102,9 +139,12 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                     if (containers.length > 0) {
                         // spawn a miner
                         name = this.createMiner(source.id, level);
+                        hasContainers = true;
                     }
-                    break;
                 }
+            }
+            if (numberOfCreeps["miners"] < sources.length && hasContainers) {
+                return;
             }
 
             let minerals = room.find(FIND_MINERALS);
@@ -161,10 +201,11 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                             break;
                         }
                     } else if (role == 'transport' || role == 'linker') {
-                        name = this.createTransport(role);
-                        break;
-                    }
-                    else {
+                        if (room.storage.store[RESOURCE_ENERGY] < room.storage.storeCapacity) {
+                            name = this.createTransport(role);
+                            break;
+                        }
+                    } else {
                         var useSource = (level < 4 || room.storage == undefined);
                         name = this.createCustomCreep(role, useSource, level);
                         break;

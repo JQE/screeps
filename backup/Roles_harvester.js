@@ -17,10 +17,7 @@ module.exports = {
         if (creep.memory.working) {
             if (creep.memory.structure) {
                 var structure = Game.getObjectById(creep.memory.structure);
-                if (structure && (
-                    (structure.structureType == STRUCTURE_CONTAINER && structure.store[RESOURCE_ENERGY] < structure.storeCapacity) || 
-                    (structure.structureType != STRUCTURE_CONTAINER && structure.structureType != STRUCTURE_TOWER && structure.energy < structure.energyCapacity) ||
-                    (structure.structureType == STRUCTURE_TOWER && structure.energy < structure.energyCapacity-100))) {
+                if (structure && structure.energy < structure.energyCapacity) {
                         if (creep.transfer(structure, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                             creep.moveTo(structure);
                         }
@@ -57,31 +54,8 @@ module.exports = {
                 if (towers) {
                     creep.memory.structure = towers.id;
                 } else {
-                    var containers = creep.room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_CONTAINER && (s.store[RESOURCE_ENERGY] < s.storeCapacity)});
-                    var sources = creep.room.find(FIND_SOURCES);
-                    var minerals = creep.room.find(FIND_MINERALS);
-                    var found = false;
-                    for (var container of containers) {
-                        for (var source of sources) {
-                            var range = source.pos.getRangeTo(container);
-                            if ( range < 2) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            for (var mineral of minerals) {
-                                if (mineral.pos.getRangeTo(container) < 2) {
-                                    found = true;
-                                    break;
-                                } 
-                            }
-                        }
-                        if (!found) {
-                            console.log("Container");
-                            creep.memory.structure = container.id;
-                            break;
-                        }
+                    if (creep.room.storage) {
+                        creep.memory.structure = creep.room.storage.id;
                     }
                 }
             }

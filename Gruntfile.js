@@ -26,11 +26,6 @@ module.exports = function(grunt) {
     grunt.initConfig({
         screeps: {
             options: {
-                server: {
-                    host: '10.2.0.110',
-                    port: 21025,
-                    http: true
-                },
                 email: email,
                 password: password,
                 branch: branch,

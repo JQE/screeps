@@ -23,7 +23,7 @@ var roleHealer = {
         if (level < 4) {
             return [HEAL,MOVE,MOVE];
         } else {
-            return [HEAL,HEAL,HEAL,HEAL,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE];
+            return [HEAL,HEAL,HEAL,HEAL,HEAL,HEAL,MOVE,MOVE,MOVE,MOVE,MOVE];
         }
     }
 }

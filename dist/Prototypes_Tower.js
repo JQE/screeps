@@ -13,21 +13,13 @@ StructureTower.prototype.defend =
 
 StructureTower.prototype.fix =
     function() {
-        var target = this.pos.findClosestByRange(FIND_STRUCTURES, { 
+        var targets = this.room.find(FIND_STRUCTURES, { 
             filter: s => 
-            (s.hits < s.hitsMax && s.structureType != STRUCTURE_WALL && s.structureType != STRUCTURE_RAMPART && s.structureType != STRUCTURE_POWER_BANK)
-        });
-        if (target == undefined) {
-            target = this.pos.findClosestByRange(FIND_STRUCTURES, { 
-                filter: s => 
-                (s.hits < s.hitsMax && s.structureType == STRUCTURE_RAMPART)
-            });
-            if (target == undefined) {
-                target = this.pos.findClosestByRange(FIND_STRUCTURES, { 
-                    filter: s => 
-                    (s.hits < s.hitsMax && s.structureType == STRUCTURE_WALL)
-                });
-            }
+            (s.hits < s.hitsMax && s.structureType != STRUCTURE_POWER_BANK && s.structureType != STRUCTURE_KEEPER_LAIR)
+        })
+        if (targets && targets.length > 0) {
+            targets.sort((a,b) => a.hits - b.hits);
+            target = targets[0];
         }
         if (target) {
             this.repair(target);
@@ -38,9 +30,14 @@ StructureTower.prototype.fix =
 
 StructureTower.prototype.medic =
     function() {
-        var target = this.pos.findClosestByRange(FIND_MY_CREEPS, {
-            filter: s => (s.hits < s.hitsMax)
-        });
+        var targets = this.room.find(FIND_MY_CREEPS, { 
+            filter: s => 
+            (s.hits < s.hitsMax)
+        })
+        if (targets && targets.length > 0) {
+            targets.sort((a,b) => a.hits - b.hits);
+            target = targets[0];
+        }
         if (target) {
             this.heal(target);
             return true;

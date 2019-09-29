@@ -53,6 +53,10 @@ module.exports = {
                 });
                 if (towers) {
                     creep.memory.structure = towers.id;
+                } else {
+                    if (creep.room.storage) {
+                        creep.memory.structure = creep.room.storage.id;
+                    }
                 }
             }
         }

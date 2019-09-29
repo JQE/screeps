@@ -15,8 +15,14 @@ var roleUpgrader = {
         }
 
         if(creep.memory.working) {
-            if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(creep.room.controller);
+            if (creep.room.controller.sign && creep.room.controller.sign.username != "Workerbe") {
+                if (creep.signController(creep.room.controller, "DaBee was Here!") == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(creep.room.controller);
+                }
+            } else {
+                if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(creep.room.controller);
+                }
             }
         }
         else {
@@ -27,7 +33,7 @@ var roleUpgrader = {
 	    if (level < 4) {
 	        return [CARRY,CARRY,MOVE,MOVE,WORK];
 	    } else {
-	        return [WORK,WORK,WORK,CARRY,CARRY,MOVE,MOVE];
+	        return [WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE];
 	    }
 	}
 };

@@ -15,7 +15,7 @@ var roleLinker = {
         }
 
         if (creep.memory.working) {            
-            if (creep.room.memory.link && creep.room.memory.link.source) {
+            if (creep.memory.linkn && creep.room.memory.link && creep.room.memory.link.source) {
                 var source = Game.getObjectById(creep.room.memory.link.source);
                 if (source) {
                     if (creep.transfer(source, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
@@ -24,7 +24,7 @@ var roleLinker = {
                 }
             }   
         } else {
-            if (creep.room.memory.link.container) {
+            if (creep.memory.linkn && creep.room.memory.link.container) {
                 var container = Game.getObjectById(creep.room.memory.link.container);
                 if (container) {
                     if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
