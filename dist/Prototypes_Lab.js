@@ -12,3 +12,12 @@ StructureLab.prototype.React =
             }    
         
     }
+
+StructureLab.prototype.runUpgrade =
+    function(creep) {
+        if (creep.pos.isNearTo(this)) {
+            this.boostCreep(creep);
+        } else {
+            return ERR_NOT_IN_RANGE;
+        }
+    }

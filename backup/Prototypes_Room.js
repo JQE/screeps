@@ -25,6 +25,7 @@ Room.prototype.foreman =
                 }
             }            
             if (location != undefined) {
+                console.log(location.x + " " + location.y+ " " + location.type);
                 this.createConstructionSite(location.x, location.y, location.type);
             }
         } else {

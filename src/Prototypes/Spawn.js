@@ -99,25 +99,10 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
         let enemies = room.find(FIND_HOSTILE_CREEPS);
         var powerbank = room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_POWER_BANK});
 
-        // If we are being attacked spawn a defender
-        if (enemies.length > numberOfCreeps['defender']) {
-            name  = this.createDefender(level);
-            return;
-        } 
-        // If we have a defender spawn a healer for it.
-        else if ((numberOfCreeps['defender'] > numberOfCreeps['healer'] && enemies > 0) || (numberOfCreeps['attacker']*2 > numberOfCreeps['healer']  && powerbank)) {
-            name = this.createHealer(level);
-            return;
-        } 
-
-        var powerbank = room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_POWER_BANK});
-        if (powerbank && powerbank.length > numberOfCreeps['attacker'] && level > 5) {
-            name = this.createAttacker(level);
-            return;
-        }
+       
         // if no harvesters are left AND either no miners or no lorries are left
         //  create a backup creep
-        else if (numberOfCreeps['harvester'] == 0) {            
+        if (numberOfCreeps['harvester'] == 0) {            
             name = this.createCustomCreep('harvester', true, 1);            
         }
         // if no backup creep is required
@@ -143,16 +128,16 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                     }
                 }
             }
-            if (numberOfCreeps["miners"] < sources.length && hasContainers) {
+            if (numberOfCreeps['miner'] < sources.length && hasContainers && room.energyCapacityAvailable >= 550) {
                 return;
             }
-
             let minerals = room.find(FIND_MINERALS);
+        
             for (let source of minerals) {
                 if (!_.some(creepsInRoom, c => c.memory.role == "miner" && c.memory.sourceId == source.id)) {
                     /** @type {Array.StructureContainer} */
                     let containers = source.pos.findInRange(FIND_STRUCTURES, 1, {
-                        filter: s => s.structureType == STRUCTURE_CONTAINER && s.store[source.mineralType] < s.storeCapacity
+                        filter: s => s.structureType == STRUCTURE_CONTAINER && (s.store[source.mineralType] < s.storeCapacity || s.store[source.mineralType] == undefined)
                     });
                     // if there is a container next to the source
                     if (containers.length > 0) {
@@ -161,6 +146,22 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                         break;
                     }
                 }
+            }
+        }
+        if (name == undefined) {
+            // If we are being attacked spawn a defender
+            if (enemies.length > numberOfCreeps['defender']) {
+                name  = this.createDefender(level);
+                return;
+            } 
+            // If we have a defender spawn a healer for it.
+            else if ((numberOfCreeps['defender'] > numberOfCreeps['healer'] && enemies > 0) || (numberOfCreeps['attacker']*3 > numberOfCreeps['healer']  && powerbank)) {
+                name = this.createHealer(level);
+                return;
+            } 
+            else if (powerbank && powerbank.length > numberOfCreeps['attacker'] && level > 5) {
+                name = this.createAttacker(level);
+                return;
             }
         }
 
@@ -243,7 +244,10 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                             filter: s => s.structureType == STRUCTURE_CONTAINER
                         });
                         if (containers.length > 0) {
-                            name = this.createRemoteCourier(room.name, roomName, mineral, extractor.id, level);
+                            var lab = Game.getObjectById(Game.rooms[roomName].memory.lab.remote);
+                            if (lab.mineralAmount < lab.mineralCapacity) {
+                                name = this.createRemoteCourier(room.name, roomName, mineral, extractor.id, level);
+                            }
                             break;
                         }
                     }

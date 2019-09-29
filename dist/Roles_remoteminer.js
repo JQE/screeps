@@ -79,7 +79,7 @@ module.exports = {
         }
     },
 	parts: function(level) {
-	    return [CARRY,CARRY,CARRY,CARRY,CARRY,WORK,WORK,MOVE,MOVE,MOVE,MOVE,MOVE];
+	    return [CARRY,CARRY,CARRY,CARRY,CARRY,WORK,WORK,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE];
 	}
     
 };
