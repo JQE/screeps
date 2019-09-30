@@ -145,20 +145,19 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
             if (numberOfCreeps['miner'] < room.sources.length && hasContainers && room.energyCapacityAvailable >= 550) {
                 return;
             }        
-            for (let source of room.mineral) {
-                if (!_.some(creepsInRoom, c => c.memory.role == "miner" && c.memory.sourceId == source.id)) {
-                    /** @type {Array.StructureContainer} */
-                    let containers = source.pos.findInRange(FIND_STRUCTURES, 1, {
-                        filter: s => s.structureType == STRUCTURE_CONTAINER && !s.isFull
-                    });
-                    // if there is a container next to the source
-                    if (containers.length > 0) {
-                        // spawn a miner
-                        name = this.createMiner(source.id, level);
-                        break;
-                    }
+            
+            if (!_.some(creepsInRoom, c => c.memory.role == "miner" && c.memory.sourceId == room.mineral.id)) {
+                /** @type {Array.StructureContainer} */
+                let containers = room.mineral.pos.findInRange(FIND_STRUCTURES, 1, {
+                    filter: s => s.structureType == STRUCTURE_CONTAINER && !s.isFull
+                });
+                // if there is a container next to the source
+                if (containers.length > 0) {
+                    // spawn a miner
+                    name = this.createMiner(room.mineral.id, level);
                 }
             }
+            
         }
         
         //var powerbank = room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_POWER_BANK});

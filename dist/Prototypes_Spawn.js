@@ -35,24 +35,20 @@ StructureSpawn.prototype.roomUpgrade =
                     courier	:	0,
                     filler	:	0
                 };   
-                var sources = room.find(FIND_SOURCES);
-                for (let source of sources) {
-                    if (room.lookAt(source.x-1, source.y) == 0) {
-                        room.createConstructionSite(source.x-1, source.y, STRUCTURE_CONTAINER);
-                    } else if (room.lookAt(source.x+1, source.y)== 0) {
-                        room.createConstructionSite(source.x+1, source.y, STRUCTURE_CONTAINER);
-                    } else if (room.lookAt(source.x, source.y-1) == 0) {
-                        room.createConstructionSite(source.x, source.y-1, STRUCTURE_CONTAINER);
-                    } else if (room.lookAt(source.x, source.y+1) == 0) {
-                        room.createConstructionSite(source.x, source.y+1, STRUCTURE_CONTAINER);
-                    } else if (room.lookAt(source.x-1, source.y-1) == 0) {                        
-                        room.createConstructionSite(source.x-1, source.y-1, STRUCTURE_CONTAINER);
-                    } else if (room.lookAt(source.x+1, source.y-1) == 0) {                        
-                        room.createConstructionSite(source.x+1, source.y-1, STRUCTURE_CONTAINER);
-                    } else if (room.lookAt(source.x+1, source.y+1) == 0) {                        
-                        room.createConstructionSite(source.x+1, source.y+1, STRUCTURE_CONTAINER);
-                    } else if (room.lookAt(source.x-1, source.y+1) == 0) {                        
-                        room.createConstructionSite(source.x-1, source.y+1, STRUCTURE_CONTAINER);
+                
+                for (let source of room.sources) {
+                    // check whether or not the source has a container
+                    /** @type {Array.StructureContainer} */
+                    let containers = source.pos.findInRange(FIND_STRUCTURES, 1, {
+                        filter: s => s.structureType == STRUCTURE_CONTAINER
+                    });
+                    
+                    // if there is no container next to the source
+                    if (containers.length == 0 || containers == undefined) {
+                        var spot = source.findContainerSpot();
+                        if (spot != undefined) {
+                            this.createConstructionSite(spot.x, spot.y, STRUCTURE_CONTAINER);
+                        }
                     }
                 }
                 room.memory.level = room.controller.level;  
@@ -127,10 +123,9 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
         // if no backup creep is required
         else if (this.memory.miners == true || this.memory.miners == undefined) {
             // check if all sources have miners
-            let sources = room.find(FIND_SOURCES);
             var hasContainers = false;
             // iterate over all sources
-            for (let source of sources) {
+            for (let source of room.sources) {
                 // if the source has no miner
                 if (!_.some(creepsInRoom, c => c.memory.role == 'miner' && c.memory.sourceId == source.id)) {
                     // check whether or not the source has a container
@@ -147,25 +142,22 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                     }
                 }
             }
-            if (numberOfCreeps['miners'] < sources.length && hasContainers) {
+            if (numberOfCreeps['miner'] < room.sources.length && hasContainers && room.energyCapacityAvailable >= 550) {
                 return;
-            }
-
-            let minerals = room.find(FIND_MINERALS);
-            for (let source of minerals) {
-                if (!_.some(creepsInRoom, c => c.memory.role == "miner" && c.memory.sourceId == source.id)) {
-                    /** @type {Array.StructureContainer} */
-                    let containers = source.pos.findInRange(FIND_STRUCTURES, 1, {
-                        filter: s => s.structureType == STRUCTURE_CONTAINER && (s.store[source.mineralType] < s.storeCapacity || s.store[source.mineralType] == undefined)
-                    });
-                    // if there is a container next to the source
-                    if (containers.length > 0) {
-                        // spawn a miner
-                        name = this.createMiner(source.id, level);
-                        break;
-                    }
+            }        
+            
+            if (!_.some(creepsInRoom, c => c.memory.role == "miner" && c.memory.sourceId == room.mineral.id)) {
+                /** @type {Array.StructureContainer} */
+                let containers = room.mineral.pos.findInRange(FIND_STRUCTURES, 1, {
+                    filter: s => s.structureType == STRUCTURE_CONTAINER && !s.isFull
+                });
+                // if there is a container next to the source
+                if (containers.length > 0) {
+                    // spawn a miner
+                    name = this.createMiner(room.mineral.id, level);
                 }
             }
+            
         }
         
         //var powerbank = room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_POWER_BANK});
@@ -211,7 +203,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                 else if (numberOfCreeps[role] < this.memory.minCreeps[role]) {
                     if (role == "courier") {
                         var lab = Game.getObjectById(this.room.memory.lab.local);
-                        if (lab && lab.mineralAmount < lab.mineralCapacity) {
+                        if (lab && !lab.isFull) {
                             name = this.createTransport(role, level);
                             break;
                         }
@@ -223,7 +215,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                             break;
                         }
                     } else if (role == 'transport' || role == 'linker') {
-                        if (room.storage.store[RESOURCE_ENERGY] < room.storage.storeCapacity) {
+                        if (!room.storage.isFull) {
                             name = this.createTransport(role);
                             break;
                         }
@@ -317,7 +309,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                         });
                         if (containers.length > 0) {
                             var lab = Game.getObjectById(Game.rooms[roomName].memory.lab.remote);
-                            if (lab.mineralAmount < lab.mineralCapacity) {
+                            if (!lab.isFull) {
                                 name = this.createRemoteCourier(room.name, roomName, mineral, extractor.id, level);
                             }
                             break;
@@ -329,7 +321,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
         // if none of the above caused a spawn command check for LongDistanceHarvesters
         /** @type {Object.<string, number>} */
         let numberOfRunners = {};
-        if (this.room.storage && this.room.storage.store[RESOURCE_ENERGY] == this.room.storage.storeCapacity) {
+        if (this.room.storage && this.room.storage.isFull) {
             if (name == undefined) {
                 // count the number of long distance runners globally
                 for (let roomName in this.memory.minRuners) {

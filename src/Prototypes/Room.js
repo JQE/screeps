@@ -27,7 +27,7 @@ Object.defineProperty(Room.prototype, 'mineral', {
             if (!this.memory.mineralId) {
                     // Find the sources and store their id's in memory, 
                     // NOT the full objects
-                this.memory.mineralId= this.find(FIND_MINERALS)[0].source.id;
+                this.memory.mineralId= this.find(FIND_MINERALS)[0].id;
             }
             // Get the source objects from the id's in memory and store them locally
             this._mineral = Game.getObjectById(this.memory.mineralId);
@@ -59,6 +59,7 @@ Room.prototype.foreman =
     function() {   
         if (this.memory.locations && this.memory.locations.length > 0) {            
             var index = 0;
+            var location = undefined;
             for (let loc of this.memory.locations) {
                 if (loc.level <= this.controller.level) {
                     location = loc;

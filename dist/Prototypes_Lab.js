@@ -1,3 +1,14 @@
+Object.defineProperty(StructureContainer.prototype, 'isFull', {
+    get: function() {
+        if (!this._isFull) {
+            this._isFull = this.mineralAmount == this.mineralCapacity;
+        }
+        return this._isFull;
+    },
+    enumerable: false,
+    configurable: true
+});
+
 
 StructureLab.prototype.React = 
     function() {

@@ -8,7 +8,7 @@ var roleUpgrader = {
             creep.memory.structure = undefined;
             creep.say('🔄 harvest');
         }
-        if(!creep.memory.working && !creep.isFull) {
+        if(!creep.memory.working && creep.isFull) {
             creep.memory.working = true;
             creep.memory.structure = undefined;
             creep.say('⚡ upgrade');
