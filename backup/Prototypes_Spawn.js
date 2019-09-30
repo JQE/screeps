@@ -322,7 +322,7 @@ StructureSpawn.prototype.createRemoteMiner =
         }
     };
 
-StructureSpawn.prototype.createRemoteMiner =
+StructureSpawn.prototype.createRemoteDefender =
     function ( target, level) {
         // create a body with the 2 carry per move
         var body = Common.roles["remotedefender"].parts(level);

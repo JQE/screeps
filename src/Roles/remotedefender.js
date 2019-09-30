@@ -1,7 +1,7 @@
 module.exports = {
     /** @param {Creep} creep **/
     run: function(creep) {
-        if (creep.memory.target != creep.room.name) {
+        if (creep.memory.remote == creep.room.name) {
             var closestHostile = creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
             if(closestHostile) {
                 var rampart = creep.pos.findClosestByRange(FIND_STRUCTURES, {filter: (s) => {s.structureType == STRUCTURE_RAMPART}});
@@ -16,7 +16,7 @@ module.exports = {
                 }
             }
         } else {
-            var exit = creep.room.findExitTo(creep.memory.target);
+            var exit = creep.room.findExitTo(creep.memory.remote);
                 creep.moveTo(creep.pos.findClosestByRange(exit)); 
         }
     },
