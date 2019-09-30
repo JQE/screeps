@@ -24,7 +24,7 @@ module.exports = {
                     var source = undefined;
                     for (let item of creep.room.memory.link.source) {
                         var check = Game.getObjectById(item);
-                        var range = creep.pos.getPathTo(check);
+                        var range = creep.pos.findPathTo(check);
                         if (range.length < distance && check.energy < check.energyCapacity) {
                             distance = range.length;
                             source = check;
@@ -32,7 +32,7 @@ module.exports = {
                     }
                 }
                 if (source != undefined || creep.room.storage) {
-                    if (source && distance < creep.pos.getPathTo(creep.room.storage).length) {
+                    if (source && distance < creep.pos.findPathTo(creep.room.storage).length) {
                         if (creep.transfer(source, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                             creep.moveTo(source);
                         }

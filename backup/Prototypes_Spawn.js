@@ -222,6 +222,19 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
         }
 
         /** @type {Object.<string,number>} */
+        let numberOfRemoteDefenders = {};
+        if (name == undefined) {
+            for (let roomName in this.memory.minRemoteDefenders) {
+                numberOfRemoteDefenders[roomName] = _.sum(Game.creeps, (c) => 
+                    c.memory.role == "remotedefender" && c.memory.remote == roomName)
+                if (numberOfRemoteDefenders[roomName] < this.memory.minRemoteDefenders[roomName]) {
+                    
+                   name = this.createRemoteDefender(roomName, level);
+                }
+            }
+        }
+
+        /** @type {Object.<string,number>} */
         let numberOfRemoteMiners = {};
         if (name == undefined) {
             for (let roomName in this.memory.minRemoteMiners) {
@@ -302,6 +315,22 @@ StructureSpawn.prototype.createRemoteMiner =
         if (this.spawnCreep(body, name, {memory: {
             role: 'remoteminer',
             home: home,
+            remote: target,
+            working: false
+        }}) == OK) {
+            return name;
+        }
+    };
+
+StructureSpawn.prototype.createRemoteMiner =
+    function ( target, level) {
+        // create a body with the 2 carry per move
+        var body = Common.roles["remotedefender"].parts(level);
+    
+        // create creep with the created body
+        var name = "RemoteDefender"+Game.time;
+        if (this.spawnCreep(body, name, {memory: {
+            role: 'remotedefender',
             remote: target,
             working: false
         }}) == OK) {

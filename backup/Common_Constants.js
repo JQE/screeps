@@ -16,7 +16,8 @@ module.exports = {
         "courier":       require('Roles_courier'),
         "filler":        require('Roles_filler'),
         "attacker":      require('Roles_attacker'),
-        "starter":       require('Roles_starter')
+        "starter":       require('Roles_starter'),
+        "remotedefender":require('Roles_remotedefender')
     },general : [
         "harvester", "transport", "linker", "filler", "courier", "claimer", "starter","upgrader", "builder", "mechanic"
     ]

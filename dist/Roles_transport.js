@@ -44,7 +44,7 @@ var roleTransport = {
 
             if (container == undefined && creep.room.memory.link) {
                 var link = Game.getObjectById(creep.room.memory.link.target);
-                if (link.energy > creep.carryCapacity) {
+                if (link.energy > (creep.carryCapacity/2)) {
                     container = link;
                 }
             }

@@ -5,7 +5,7 @@ StructureLink.prototype.Send =
                 if (this.id == s) {
                     var target = Game.getObjectById(this.room.memory.link.target);
                     if (target) {
-                        if (this.energy > 400) {
+                        if (this.energy > 200) {
                             var status = this.transferEnergy(target);
                         }
                     }
