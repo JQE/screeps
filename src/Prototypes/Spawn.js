@@ -9,28 +9,28 @@ StructureSpawn.prototype.roomUpgrade =
         if (room.memory.level != room.controller.level) {
             if (room.controller.level == 4) {
                 if (this.room.storage) {
-                    room.memory.minCreeps.transport = 3;
+                    this.memory.minCreeps.transport = 3;
                     room.memory.level = room.controller.level; 
                 }
             } else if (room.controller.level == 1) {
-                room.memory.minCreeps = { 
-                    harvester	:	2,
-                    upgrader	:	2,
+                this.memory.minCreeps = { 
+                    harvester	:	1,
+                    upgrader	:	1,
                     builder	:	1,
                     transport	:	0,
-                    mechanic	:	1,
+                    mechanic	:	0,
                     linker	:	0,
                     courier	:	0,
                     filler	:	0
                 };     
                 room.memory.level = room.controller.level;           
             } else if (room.controller.level == 2) {
-                room.memory.minCreeps = { 
-                    harvester	:	4,
-                    upgrader	:	4,
-                    builder	:	3,
+                this.memory.minCreeps = { 
+                    harvester	:	2,
+                    upgrader	:	2,
+                    builder	:	2,
                     transport	:	0,
-                    mechanic	:	3,
+                    mechanic	:	2,
                     linker	:	0,
                     courier	:	0,
                     filler	:	0
@@ -60,6 +60,21 @@ StructureSpawn.prototype.roomUpgrade =
                 room.memory.level = room.controller.level;
             }   
         }
+        if (room.controller.level == 2 && this.memory.mining == false) {
+            if (room.energyCapacityAvailable >= 550) {
+                this.memory.mining = true;
+                this.memory.minCreeps = { 
+                    harvester	:	4,
+                    upgrader	:	4,
+                    builder	:	3,
+                    transport	:	0,
+                    mechanic	:	3,
+                    linker	:	0,
+                    courier	:	0,
+                    filler	:	0
+                }; 
+            }
+        }
     }
 
 // create a new function for StructureSpawn
@@ -70,7 +85,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
         let level = room.controller.level;
 
         let enemies = room.find(FIND_HOSTILE_CREEPS);
-
+        
 
         if (this.spawning) {
             var spawningCreep = Game.creeps[this.spawning.name];
@@ -84,7 +99,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                 {align: 'left', opacity: 0.8});
                 return;
         }
-
+        
 
         // find all creeps in room
         /** @type {Array.<Creep>} */
@@ -98,7 +113,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
         for (let role of Object.keys(Common.roles)) {
             numberOfCreeps[role] = _.sum(creepsInRoom, (c) => c.memory.role == role);
         }
-        if (numberOfCreeps == undefined || numberOfCreeps.length == 0 || room.memory.minCreeps == undefined) {
+        if (numberOfCreeps == undefined || numberOfCreeps.length == 0 || this.memory.minCreeps == undefined) {
             return;
         }
         let name = undefined;
@@ -110,7 +125,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
             name = this.createCustomCreep('harvester', true, 1);            
         }
         // if no backup creep is required
-        else {
+        else if (this.memory.miners == true || this.memory.miners == undefined) {
             // check if all sources have miners
             let sources = room.find(FIND_SOURCES);
             var hasContainers = false;
@@ -132,11 +147,11 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                     }
                 }
             }
-            if (numberOfCreeps['miner'] < sources.length && hasContainers && room.energyCapacityAvailable >= 550) {
+            if (numberOfCreeps['miners'] < sources.length && hasContainers) {
                 return;
             }
+
             let minerals = room.find(FIND_MINERALS);
-        
             for (let source of minerals) {
                 if (!_.some(creepsInRoom, c => c.memory.role == "miner" && c.memory.sourceId == source.id)) {
                     /** @type {Array.StructureContainer} */
@@ -153,7 +168,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
             }
         }
         
-        var powerbank = room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_POWER_BANK});
+        //var powerbank = room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_POWER_BANK});
         if (name == undefined) {
             // If we are being attacked spawn a defender
             if (enemies.length > numberOfCreeps['defender']) {
@@ -165,10 +180,10 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                 name = this.createHealer(level);
                 return;
             } 
-            else if (powerbank && powerbank.length > numberOfCreeps['attacker'] && level > 5) {
+            /*else if (powerbank && powerbank.length > numberOfCreeps['attacker'] && level > 5) {
                 name = this.createAttacker(level);
                 return;
-            }
+            }*/
         }
 
         // if none of the above caused a spawn command check for other roles
@@ -193,7 +208,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                     }
                 }
                 // if no claim order was found, check other roles
-                else if (numberOfCreeps[role] < room.memory.minCreeps[role]) {
+                else if (numberOfCreeps[role] < this.memory.minCreeps[role]) {
                     if (role == "courier") {
                         var lab = Game.getObjectById(this.room.memory.lab.local);
                         if (lab && lab.mineralAmount < lab.mineralCapacity) {
@@ -224,10 +239,10 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
         /** @type {Object.<string,number>} */
         let numberOfRemoteDefenders = {};
         if (name == undefined) {
-            for (let roomName in room.memory.minRemoteDefenders) {
+            for (let roomName in this.memory.minRemoteDefenders) {
                 numberOfRemoteDefenders[roomName] = _.sum(Game.creeps, (c) => 
                     c.memory.role == "remotedefender" && c.memory.remote == roomName)
-                if (numberOfRemoteDefenders[roomName] < room.memory.minRemoteDefenders[roomName]) {
+                if (numberOfRemoteDefenders[roomName] < this.memory.minRemoteDefenders[roomName]) {
                     
                    name = this.createRemoteDefender(roomName, level);
                 }
@@ -237,12 +252,50 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
         /** @type {Object.<string,number>} */
         let numberOfRemoteMiners = {};
         if (name == undefined) {
-            for (let roomName in room.memory.minRemoteMiners) {
+            for (let roomName in this.memory.minRemoteMiners) {
                 numberOfRemoteMiners[roomName] = _.sum(Game.creeps, (c) => 
                     c.memory.role == "remoteminer" && c.memory.remote == roomName)
-                if (numberOfRemoteMiners[roomName] < room.memory.minRemoteMiners[roomName]) {
+                if (numberOfRemoteMiners[roomName] < this.memory.minRemoteMiners[roomName]) {
                     
-                   name = this.createRemoteMiner(room.name, roomName, level);
+                   name = this.createRemoteMiner(roomName, level);
+                }
+            }
+        }
+
+        /** @type {Object.<string,number>} */
+        let numberOfReservers = {};
+        if (name == undefined) {
+            for (let roomName in this.memory.minReservers) {
+                numberOfReservers[roomName] = _.sum(Game.creeps, (c) => 
+                    c.memory.role == "reserver" && c.memory.remote == roomName)
+                if (numberOfReservers[roomName] < this.memory.minReservers[roomName]) {
+                    
+                   name = this.createReserver(roomName, level);
+                }
+            }
+        }
+
+        /** @type {Object.<string,number>} */
+        let numberOfRemoteTransports = {};
+        if (name == undefined) {
+            for (let roomName in this.memory.minRemoteTransports) {
+                numberOfRemoteTransports[roomName] = _.sum(Game.creeps, (c) => 
+                    c.memory.role == "remotetransport" && c.memory.remote == roomName)
+                if (numberOfRemoteTransports[roomName] < this.memory.minRemoteTransports[roomName]) {
+                    
+                   name = this.createRemoteTransport(room.name, roomName, level);
+                }
+            }
+        }
+
+        /** @type {Object.<string,number>} */
+        let numberOfRemoteBuilders = {};
+        if (name == undefined) {
+            for (let roomName in this.memory.minRemoteBuilders) {
+                numberOfRemoteBuilders[roomName] = _.sum(Game.creeps, (c) => 
+                    c.memory.role == "remotebuilder" && c.memory.remote == roomName)
+                if (numberOfRemoteBuilders[roomName] < this.memory.minRemoteBuilders[roomName]) {
+                    name = this.createRemoteBuilder(roomName, level);                    
                 }
             }
         }
@@ -252,10 +305,10 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
         /** @type {Object.<string, number>} */
         let numberOfRemoteCouriers = {};
         if (name == undefined) {
-            for (let roomName in room.memory.minRemoteCouriers) {
+            for (let roomName in this.memory.minRemoteCouriers) {
                 numberOfRemoteCouriers[roomName] = _.sum(Game.creeps, (c) => 
                     c.memory.role == "remotecourier" && c.memory.remote == roomName)
-                if (numberOfRemoteCouriers[roomName] < room.memory.minRemoteCouriers[roomName]) {
+                if (numberOfRemoteCouriers[roomName] < this.memory.minRemoteCouriers[roomName]) {
                     var mineral = room.memory.lab.resource;
                     var extractor = this.room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_EXTRACTOR})[0];
                     if (extractor) {
@@ -279,11 +332,11 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
         if (this.room.storage && this.room.storage.store[RESOURCE_ENERGY] == this.room.storage.storeCapacity) {
             if (name == undefined) {
                 // count the number of long distance runners globally
-                for (let roomName in room.memory.minRuners) {
+                for (let roomName in this.memory.minRuners) {
                     numberOfRunners[roomName] = _.sum(Game.creeps, (c) =>
                         c.memory.role == 'runner' && c.memory.target == roomName)
     
-                    if (numberOfRunners[roomName] < room.memory.minRuners[roomName]) {
+                    if (numberOfRunners[roomName] < this.memory.minRuners[roomName]) {
                         name = this.createRunner(room.name, roomName, level);
                         break;
                     }
@@ -305,8 +358,41 @@ StructureSpawn.prototype.createCustomCreep =
 
     };
 
+StructureSpawn.prototype.createRemoteTransport =
+    function(home, target, level) {
+        // create a body with the 2 carry per move
+        var body = Common.roles["remotetransport"].parts(level);
+            
+        // create creep with the created body
+        var name = "RemoteTransport"+Game.time;
+        if (this.spawnCreep(body, name, {memory: {
+            role: 'remotetransport',
+            home: home,
+            remote: target,
+            working: false
+        }}) == OK) {
+            return name;
+        }
+    }
+
+StructureSpawn.prototype.createReserver =
+    function(target, level) {
+        // create a body with the 2 carry per move
+        var body = Common.roles["reserver"].parts(level);
+            
+        // create creep with the created body
+        var name = "Reserver"+Game.time;
+        if (this.spawnCreep(body, name, {memory: {
+            role: 'reserver',
+            remote: target,
+            working: false
+        }}) == OK) {
+            return name;
+        }
+    }
+
 StructureSpawn.prototype.createRemoteMiner =
-    function ( home, target, level) {
+    function ( target, level) {
         // create a body with the 2 carry per move
         var body = Common.roles["remoteminer"].parts(level);
     
@@ -314,7 +400,22 @@ StructureSpawn.prototype.createRemoteMiner =
         var name = "RemoteMiner"+Game.time;
         if (this.spawnCreep(body, name, {memory: {
             role: 'remoteminer',
-            home: home,
+            remote: target,
+            working: false
+        }}) == OK) {
+            return name;
+        }
+    };
+
+StructureSpawn.prototype.createRemoteBuilder =
+    function ( target, level) {
+        // create a body with the 2 carry per move
+        var body = Common.roles["remotebuilder"].parts(level);
+    
+        // create creep with the created body
+        var name = "RemoteBuilder"+Game.time;
+        if (this.spawnCreep(body, name, {memory: {
+            role: 'remotebuilder',
             remote: target,
             working: false
         }}) == OK) {

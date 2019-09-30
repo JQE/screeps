@@ -58,12 +58,7 @@ module.exports = {
             }  
         } else {
             if (creep.memory.remote == creep.room.name) {
-                var source = creep.pos.findClosestByPath(FIND_SOURCES);
-                if (source) {
-                    if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(source);
-                    }
-                }
+                creep.getEnergy(true, false);                
             } else {
                 var exit = creep.room.findExitTo(creep.memory.remote);
                 creep.moveTo(creep.pos.findClosestByRange(exit)); 

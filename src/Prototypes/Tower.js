@@ -13,6 +13,7 @@ StructureTower.prototype.defend =
 
 StructureTower.prototype.fix =
     function() {
+        var target = undefined;
         var targets = this.room.find(FIND_STRUCTURES, { 
             filter: s => 
             (s.hits < s.hitsMax && s.structureType != STRUCTURE_POWER_BANK && s.structureType != STRUCTURE_KEEPER_LAIR)
@@ -21,7 +22,7 @@ StructureTower.prototype.fix =
             targets.sort((a,b) => a.hits - b.hits);
             target = targets[0];
         }
-        if (target) {
+        if (target != undefined) {
             this.repair(target);
             return true;
         }
@@ -30,6 +31,7 @@ StructureTower.prototype.fix =
 
 StructureTower.prototype.medic =
     function() {
+        var target = undefined;
         var targets = this.room.find(FIND_MY_CREEPS, { 
             filter: s => 
             (s.hits < s.hitsMax)
@@ -38,7 +40,7 @@ StructureTower.prototype.medic =
             targets.sort((a,b) => a.hits - b.hits);
             target = targets[0];
         }
-        if (target) {
+        if (target != undefined) {
             this.heal(target);
             return true;
         }

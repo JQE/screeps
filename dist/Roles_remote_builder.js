@@ -26,7 +26,12 @@ module.exports = {
             }
         }
         else {
-            creep.getEnergy(true,creep.memory.usesource);
+            if (creep.memory.remote != creep.room.name) {
+                var exit = creep.room.findExitTo(creep.memory.remote);
+                creep.moveTo(creep.pos.findClosestByRange(exit)); 
+            } else {
+                creep.getEnergy(true,true);
+            }
         }
 	},
 	parts: function(level) {
