@@ -8,7 +8,7 @@ var roleTransport = {
             creep.say('🔄 collecting');
         }
 
-        if (!creep.memory.working && creep.carry.energy == creep.carryCapacity) {
+        if (!creep.memory.working && creep.isFull) {
             creep.memory.working = true;
             creep.memory.structure = undefined;
             creep.say('🛢️ transporting')
@@ -51,7 +51,7 @@ var roleTransport = {
 
             if (container == undefined) {
                 container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-                    filter: s => s.structureType == STRUCTURE_CONTAINER && s.store[RESOURCE_ENERGY] > creep.carryCapacity
+                    filter: s => s.structureType == STRUCTURE_CONTAINER && !s.isFull
                 });
             }
 

@@ -5,6 +5,18 @@ Creep.prototype.runRole =
         Common.roles[this.memory.role].run(this);
     };
 
+
+Object.defineProperty(Creep.prototype, 'isFull', {
+    get: function() {
+        if (!this._isFull) {
+            this._isFull = _.sum(this.carry) === this.carryCapacity;
+        }
+        return this._isFull;
+    },
+    enumerable: false,
+    configurable: true
+});
+
 /** @function
  * @param {bool} useContainer
  * @param {bool} useSource
@@ -62,13 +74,13 @@ Creep.prototype.findEnergyTarget =
         if(target) {
             this.memory.structure = target.id;
         } else {
-            var lab = this.pos.findClosestByPath(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_LAB && s.energy < s.energyCapacity});
+            var lab = this.pos.findClosestByPath(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_LAB && !s.isFull});
             if (lab) {
                 this.memory.structure = lab.id;
             } else {
                 var towers = this.pos.findClosestByPath(FIND_STRUCTURES, {
                     filter: (structure) => {
-                        return (structure.structureType == STRUCTURE_TOWER) && structure.energy < structure.energyCapacity-100;
+                        return (structure.structureType == STRUCTURE_TOWER) && !s.isFull;
                     }
                 });
                 if (towers) {
