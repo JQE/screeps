@@ -19,11 +19,29 @@ module.exports = {
                 var exit = creep.room.findExitTo(creep.memory.home);
                 creep.moveTo(creep.pos.findClosestByRange(exit));
             } else {
-                if (creep.room.stroage) {
-                    if( creep.transfer(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(creep.room.storage);
+                var distance = 99;
+                if (creep.room.memory.link && creep.room.memory.link.source) {
+                    var source = undefined;
+                    for (let item of creep.room.memory.link.source) {
+                        var check = Game.getObjectById(item);
+                        var range = creep.pos.findPathTo(check);
+                        if (range.length < distance && check.energy < check.energyCapacity) {
+                            distance = range.length;
+                            source = check;
+                        }
                     }
-                } else {
+                }
+                if (source != undefined || creep.room.storage) {
+                    if (source && distance < creep.pos.findPathTo(creep.room.storage).length) {
+                        if (creep.transfer(source, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(source);
+                        }
+                    } else {
+                        if( creep.transfer(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(creep.room.storage);
+                        }
+                    }
+                } else  {
                     if (creep.memory.structure) {
                         var structure = Game.getObjectById(creep.memory.structure);
                         if (structure && structure.energy < structure.energyCapacity) {
@@ -31,10 +49,10 @@ module.exports = {
                                     creep.moveTo(structure);
                                 }
                         } else {
-                            this.findTarget(creep);
+                            creep.findTarget(creep);
                         }
                     } else {
-                       this.findTarget(creep);
+                       creep.findTarget(creep);
                     }
                 }
             }  
@@ -49,32 +67,6 @@ module.exports = {
             } else {
                 var exit = creep.room.findExitTo(creep.memory.remote);
                 creep.moveTo(creep.pos.findClosestByRange(exit)); 
-            }
-        }
-    },
-    /** @param {Creep} creep */
-	findTarget: function(creep) {
-        var target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return (structure.structureType == STRUCTURE_EXTENSION ||
-                        structure.structureType == STRUCTURE_SPAWN) && structure.energy < structure.energyCapacity;
-            }
-        });
-        if(target) {
-            creep.memory.structure = target.id;
-        } else {
-            var lab = creep.pos.findClosestByPath(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_LAB && s.energy < s.energyCapacity});
-            if (lab) {
-                creep.memory.structure = lab.id;
-            } else {
-                var towers = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-                    filter: (structure) => {
-                        return (structure.structureType == STRUCTURE_TOWER) && structure.energy < structure.energyCapacity-100;
-                    }
-                });
-                if (towers) {
-                    creep.memory.structure = towers.id;
-                }
             }
         }
     },

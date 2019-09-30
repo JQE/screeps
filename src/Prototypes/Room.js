@@ -28,14 +28,6 @@ Room.prototype.foreman =
                 console.log(location.x + " " + location.y+ " " + location.type);
                 this.createConstructionSite(location.x, location.y, location.type);
             }
-        } else {
-            if (this.memory.lastick == undefined) {
-                this.memory.lastick = Game.time;
-            }
-            if (this.memory.lastick+100 < Game.time) {
-                this.memory.lastick = Game.time;
-                console.log("No more Locations defined for room: "+this.name);
-            }
         }
     }
 

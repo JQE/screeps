@@ -50,3 +50,30 @@ Creep.prototype.getEnergy =
             }
         }
     };
+
+Creep.prototype.findEnergyTarget =
+    function() {
+        var target = this.pos.findClosestByPath(FIND_STRUCTURES, {
+            filter: (structure) => {
+                return (structure.structureType == STRUCTURE_EXTENSION ||
+                        structure.structureType == STRUCTURE_SPAWN) && structure.energy < structure.energyCapacity;
+            }
+        });
+        if(target) {
+            this.memory.structure = target.id;
+        } else {
+            var lab = this.pos.findClosestByPath(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_LAB && s.energy < s.energyCapacity});
+            if (lab) {
+                this.memory.structure = lab.id;
+            } else {
+                var towers = this.pos.findClosestByPath(FIND_STRUCTURES, {
+                    filter: (structure) => {
+                        return (structure.structureType == STRUCTURE_TOWER) && structure.energy < structure.energyCapacity-100;
+                    }
+                });
+                if (towers) {
+                    this.memory.structure = towers.id;
+                }
+            }
+        }
+    }

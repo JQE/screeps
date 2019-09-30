@@ -4,7 +4,7 @@ var roleCourier = {
     run: function(creep) {
 
 
-        if (creep.memory.active && creep.carry[creep.room.memory.lab.resource] == 0) {
+        if (creep.memory.active && (creep.carry[creep.room.memory.lab.resource] == 0 || creep.carry[creep.room.memory.lab.resource] == undefined)) {
             creep.memory.active = false;
             creep.memory.structure = undefined;
             creep.say('🔄 collecting');

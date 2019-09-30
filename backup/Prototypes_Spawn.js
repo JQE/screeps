@@ -68,8 +68,15 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
         /** @type {Room} */
         let room = this.room;
         let level = room.controller.level;
+
+        let enemies = room.find(FIND_HOSTILE_CREEPS);
+
+
         if (this.spawning) {
             var spawningCreep = Game.creeps[this.spawning.name];
+            if (enemies == 0 && spawningCreep.memory.role == "defender") {
+                this.cancel();
+            } 
             room.visual.text(
                 '🛠️' + spawningCreep.memory.role,
                 this.pos.x + 1,
@@ -95,9 +102,6 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
             return;
         }
         let name = undefined;
-
-        let enemies = room.find(FIND_HOSTILE_CREEPS);
-        var powerbank = room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_POWER_BANK});
 
        
         // if no harvesters are left AND either no miners or no lorries are left
@@ -148,6 +152,8 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                 }
             }
         }
+        
+        var powerbank = room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_POWER_BANK});
         if (name == undefined) {
             // If we are being attacked spawn a defender
             if (enemies.length > numberOfCreeps['defender']) {
