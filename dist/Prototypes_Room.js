@@ -41,7 +41,7 @@ Room.prototype.plan =
 
 Room.prototype.maintain =
     function() {
-        if (this.controller.level >= 2) {
+        if (this.controller && this.controller.level >= 2) {
             let sources = this.find(FIND_SOURCES);
             // iterate over all sources
             for (let source of sources) { 

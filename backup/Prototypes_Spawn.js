@@ -75,7 +75,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
         if (this.spawning) {
             var spawningCreep = Game.creeps[this.spawning.name];
             if (enemies == 0 && spawningCreep.memory.role == "defender") {
-                this.cancel();
+                this.spawning.cancel();
             } 
             room.visual.text(
                 '🛠️' + spawningCreep.memory.role,

@@ -1,7 +1,7 @@
 module.exports = {
     /** @param {Creep} creep **/
     run: function(creep) {
-        if (creep.memory.remote != creep.room.name) {
+        if (creep.memory.remote == creep.room.name) {
             var closestHostile = creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
             if(closestHostile) {
                 var rampart = creep.pos.findClosestByRange(FIND_STRUCTURES, {filter: (s) => {s.structureType == STRUCTURE_RAMPART}});
@@ -14,17 +14,22 @@ module.exports = {
                 } else if (creepRange <= 3) {
                     creep.rangedAttack(closestHostile);
                 }
+            } else {
+                var flag = creep.room.find(FIND_FLAGS);
+                if (flag.length > 0) {
+                    creep.moveTo(flag[0]);
+                }
             }
         } else {
             var exit = creep.room.findExitTo(creep.memory.remote);
-                creep.moveTo(creep.pos.findClosestByRange(exit)); 
+            creep.moveTo(creep.pos.findClosestByRange(exit)); 
         }
     },
 	parts: function(level) {
 	    if (level < 4) {
 	        return [TOUGH,TOUGH,TOUGH,MOVE,MOVE,ATTACK,ATTACK,ATTACK,MOVE];
 	    } else {
-	        return [MOVE,MOVE,MOVE,TOUGH,TOUGH,MOVE,MOVE,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,RANGED_ATTACK,RANGED_ATTACK,RANGED_ATTACK,MOVE];
+	        return [MOVE,MOVE,MOVE,TOUGH,TOUGH,MOVE,MOVE,ATTACK,ATTACK,ATTACK,ATTACK,MOVE];
 	    }
 	}
 }

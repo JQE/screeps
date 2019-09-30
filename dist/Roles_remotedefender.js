@@ -14,17 +14,22 @@ module.exports = {
                 } else if (creepRange <= 3) {
                     creep.rangedAttack(closestHostile);
                 }
+            } else {
+                var flag = creep.room.find(FIND_FLAGS);
+                if (flag.length > 0) {
+                    creep.moveTo(flag[0]);
+                }
             }
         } else {
             var exit = creep.room.findExitTo(creep.memory.remote);
-                creep.moveTo(creep.pos.findClosestByRange(exit)); 
+            creep.moveTo(creep.pos.findClosestByRange(exit)); 
         }
     },
 	parts: function(level) {
 	    if (level < 4) {
 	        return [TOUGH,TOUGH,TOUGH,MOVE,MOVE,ATTACK,ATTACK,ATTACK,MOVE];
 	    } else {
-	        return [MOVE,MOVE,MOVE,TOUGH,TOUGH,MOVE,MOVE,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,RANGED_ATTACK,RANGED_ATTACK,RANGED_ATTACK,MOVE];
+	        return [MOVE,MOVE,MOVE,TOUGH,TOUGH,MOVE,MOVE,ATTACK,ATTACK,ATTACK,ATTACK,MOVE];
 	    }
 	}
 }
