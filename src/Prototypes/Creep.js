@@ -2,7 +2,7 @@ var Common = require('Common_Constants');
 
 Creep.prototype.runRole = 
     function() {
-        Common.roles[this.memory.role].run(this);
+        Common.ROLES[this.memory.role].run(this);
     };
 
 
@@ -27,35 +27,34 @@ Creep.prototype.getEnergy =
         let container;
 
         if (useContainer) {
-            if (this.room.storage && this.room.storage.store[RESOURCE_ENERGY] > this.carryCapacity) {
+            if (this.room.storage) {
                 container = true;
-                if (this.withdraw(this.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    this.moveTo(this.room.storage);
+                if (this.room.storage.store[RESOURCE_ENERGY] > this.carryCapacity) {                    
+                    container = this.room.storage;
                 }
             } else {
                 if (this.memory.structure) {
-                    container = Game.getObjectById(this.memory.structure);
-                    if (container && container.store[RESOURCE_ENERGY] > this.carryCapacity) {
-                        if (this.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                            this.moveTo(container);
-                        }
+                    var item = Game.getObjectById(this.memory.structure);
+                    if (item && item.store[RESOURCE_ENERGY] > this.carryCapacity) {
+                        container = item;
                     } else {
                         delete this.memory.structure;
                     }                    
                 }
                 if (this.memory.structure == undefined) {
-                    container = this.pos.findClosestByPath(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_CONTAINER && s.store[RESOURCE_ENERGY] > this.carryCapacity});
-                    if (container) {
-                        this.memory.structure = container.id;
-                        if (this.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                            this.moveTo(container);
-                        }
+                    var item = this.pos.findClosestByPath(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_CONTAINER && s.store[RESOURCE_ENERGY] > this.carryCapacity});
+                    if (item) {
+                        this.memory.structure = item.id;
+                        container = item;                        
                     }
                 }
             }
         }
-
-        if (container == undefined && useSource) {
+        if (container) {
+            if (this.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                this.moveTo(container);
+            }
+        } else if (useSource) {
             var source = this.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
             if (this.harvest(source) == ERR_NOT_IN_RANGE) {
                 this.moveTo(source);
@@ -80,7 +79,7 @@ Creep.prototype.findEnergyTarget =
             } else {
                 var towers = this.pos.findClosestByPath(FIND_STRUCTURES, {
                     filter: (structure) => {
-                        return (structure.structureType == STRUCTURE_TOWER) && !s.isFull;
+                        return (structure.structureType == STRUCTURE_TOWER) && !structure.isFull;
                     }
                 });
                 if (towers) {

@@ -5,13 +5,11 @@ module.exports = {
         if (creep.memory.working && creep.carry.energy == 0) {
             creep.memory.working = false;
             creep.memory.structure = undefined;
-            creep.say('🔄 collecting');
         }
 
         if (!creep.memory.working && creep.carry.energy == creep.carryCapacity) {
             creep.memory.working = true;
             creep.memory.structure = undefined;
-            creep.say('🛢️ transporting')
         }
 
         if (creep.memory.working) {
@@ -22,43 +20,13 @@ module.exports = {
                             creep.moveTo(structure);
                         }
                 } else {
-                    this.findTarget(creep);
+                    creep.findEnergyTarget();
                 }
             } else {
-               this.findTarget(creep);
+                creep.findEnergyTarget();
             }
         } else {
-            creep.getEnergy(true, true);
-        }
-    },
-    /** @param {Creep} creep */
-	findTarget: function(creep) {
-        var target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return (structure.structureType == STRUCTURE_EXTENSION ||
-                        structure.structureType == STRUCTURE_SPAWN) && structure.energy < structure.energyCapacity;
-            }
-        });
-        if(target) {
-            creep.memory.structure = target.id;
-        } else {
-            var lab = creep.pos.findClosestByPath(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_LAB && s.energy < s.energyCapacity});
-            if (lab) {
-                creep.memory.structure = lab.id;
-            } else {
-                var towers = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-                    filter: (structure) => {
-                        return (structure.structureType == STRUCTURE_TOWER) && structure.energy < structure.energyCapacity-100;
-                    }
-                });
-                if (towers) {
-                    creep.memory.structure = towers.id;
-                } else {
-                    if (creep.room.storage) {
-                        creep.memory.structure = creep.room.storage.id;
-                    }
-                }
-            }
+            creep.getEnergy(true, false);
         }
     },
 	parts: function(level ) {

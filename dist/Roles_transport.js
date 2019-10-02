@@ -1,17 +1,15 @@
-var roleTransport = {
+module.exports = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
         if (creep.memory.working && creep.carry.energy == 0) {
             creep.memory.working = false;
             creep.memory.structure = undefined;
-            creep.say('🔄 collecting');
         }
 
         if (!creep.memory.working && creep.isFull) {
             creep.memory.working = true;
             creep.memory.structure = undefined;
-            creep.say('🛢️ transporting')
         }
 
         if (creep.memory.working) {
@@ -51,7 +49,7 @@ var roleTransport = {
 
             if (container == undefined) {
                 container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-                    filter: s => s.structureType == STRUCTURE_CONTAINER && !s.isFull
+                    filter: s => s.structureType == STRUCTURE_CONTAINER && s.store[RESOURCE_ENERGY] > creep.carryCapacity
                 });
             }
 
@@ -67,11 +65,9 @@ var roleTransport = {
         }
 	},
 	parts: function(level) {
-        if (level < 4) {
+        if (level < 3) {
             return [WORK,MOVE,CARRY];
         }
 	    return [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE];
 	}
 };
-
-module.exports = roleTransport;

@@ -23,7 +23,7 @@ module.exports = {
         }
     },
 	parts: function(level) {
-        if (level < 2) {
+        if (level < 4) {
             return [WORK,MOVE,CARRY];
         }
         return [WORK,WORK,WORK,WORK,WORK,MOVE];

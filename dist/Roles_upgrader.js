@@ -1,4 +1,4 @@
-var roleUpgrader = {
+module.exports = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
@@ -6,12 +6,10 @@ var roleUpgrader = {
         if(creep.memory.working && creep.carry.energy == 0) {
             creep.memory.working = false;
             creep.memory.structure = undefined;
-            creep.say('🔄 harvest');
         }
         if(!creep.memory.working && creep.isFull) {
             creep.memory.working = true;
             creep.memory.structure = undefined;
-            creep.say('⚡ upgrade');
         }
 
         if(creep.memory.working) {
@@ -37,5 +35,3 @@ var roleUpgrader = {
 	    }
 	}
 };
-
-module.exports = roleUpgrader;

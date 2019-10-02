@@ -1,16 +1,14 @@
-var roleMechanic = {
+module.exports = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
         if(creep.memory.working && creep.carry.energy == 0) {
             creep.memory.working = false;
             creep.memory.structure = undefined;
-            creep.say('🔄 harvest');
         }
         if(!creep.memory.working && creep.carry.energy == creep.carryCapacity) {
             creep.memory.working = true;
             creep.memory.structure = undefined;
-            creep.say('🚧 build');
         }
 
         if(creep.memory.working) {
@@ -37,7 +35,7 @@ var roleMechanic = {
             }
         }
         else {
-            creep.getEnergy(true, false);
+            creep.getEnergy(true, creep.memory.usesource);
         }
 	},
 	parts: function(level) {
@@ -48,5 +46,3 @@ var roleMechanic = {
 	    }
 	}
 };
-
-module.exports = roleMechanic;
