@@ -6,7 +6,8 @@ module.exports = {
         "MECHANIC"      :   require('Roles_Mechanic'),
         "TRANSPORT"     :   require('Roles_Transport'),
         "MINER"         :   require('Roles_Miner'),
-        "HARVESTER"     :   require('Roles_Harvester')
+        "HARVESTER"     :   require('Roles_Harvester'),
+        "DEFENDER"      :   require('Roles_Defender')
     },
     SPAWN_LIST : [
         "TRANSPORT","HARVESTER","UPGRADER","BUILDER","MECHANIC"

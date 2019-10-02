@@ -264,17 +264,23 @@ function () {
         } else {
             let name = undefined;
 
+            // check if we are being attacked
+            if (enemies.length > 0 && numberOfCreeps['DEFENDER'] < enemies.length) {
+                name = spawn.newCreep("DEFENDER", level);
+                numberOfCreeps['DEFENDER']++;
+            }
             // Spawns a farmer if we don't have one.
             // Will check for advanced Harvesters as well in the future
             // This is to ensure getting energy is number 1 priority
             if ((numberOfCreeps['FARMER'] == 0  || numberOfCreeps['FARMER'] == undefined) && 
-                (numberOfCreeps['HARVESTER'] == 0 || numberOfCreeps['HARVESTER'] == undefined)) {                
+                (numberOfCreeps['HARVESTER'] == 0 || numberOfCreeps['HARVESTER'] == undefined) &&
+                name == undefined) {                
                 console.log("Backup Starting");
                 name = spawn.newCreep('FARMER', 1);
                 if (name != undefined) {
                     numberOfCreeps['FARMER']++;
                 }
-            } else {
+            } else if (name == undefined) {
                 if (!this.memory.mining) {
                     if (numberOfCreeps['FARMER'] < this.freeSpaceCount/2) {
                         name = spawn.newCreep('FARMER', level);                    
