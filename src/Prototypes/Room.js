@@ -133,7 +133,6 @@ Room.prototype.roomUpgrade =
         if (this.memory.level != this.controller.level) {
             if (this.controller.level == 4) {
                 if (this.storage) {
-                    this.memory.minCreeps.HARVESTER = 2;
                     this.memory.minCreeps.TRANSPORT = 3;
                     this.memory.level = this.controller.level; 
                 }
@@ -163,7 +162,8 @@ Room.prototype.roomUpgrade =
                 this.memory.minCreeps = {     
                     UPGRADER	:	1,
                     BUILDER     :   2,
-                    MECHANIC    :   1
+                    MECHANIC    :   1,
+                    HARVESTER   :   3
                 }; 
             }
         }
