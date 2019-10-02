@@ -88,7 +88,8 @@ Room.prototype.plan =
 
 Room.prototype.maintain =
     function() {
-        if (this.controller && this.controller.level >= 2) {            
+        if (this.controller && this.controller.level >= 2) {       
+            var mineContainers = 0;     
             // iterate over all sources
             for (let source of this.sources) { 
                 // check whether or not the source has a container
@@ -114,7 +115,12 @@ Room.prototype.maintain =
                             }
                         };
                     };
+                } else {
+                    mineContainers++;
                 }
+            }
+            if (mineContainers >= this.sources.length) {
+                this.memory.staticMining = true;
             }
         }
     }
@@ -127,7 +133,8 @@ Room.prototype.roomUpgrade =
         if (this.memory.level != this.controller.level) {
             if (this.controller.level == 4) {
                 if (this.storage) {
-                    this.memory.minCreeps.transport = 3;
+                    this.memory.minCreeps.HARVESTER = 2;
+                    this.memory.minCreeps.TRANSPORT = 3;
                     this.memory.level = this.controller.level; 
                 }
             } else if (this.controller.level == 1) {
@@ -145,23 +152,6 @@ Room.prototype.roomUpgrade =
                     MECHANIC    :   1
                 };   
                 
-                for (let source of this.sources) {
-                    // check whether or not the source has a container
-                    /** @type {Array.StructureContainer} */
-                    let containers = source.pos.findInRange(FIND_STRUCTURES, 1, {
-                        filter: s => s.structureType == STRUCTURE_CONTAINER
-                    });
-                    
-                    // if there is no container next to the source
-                    if (containers.length == 0 || containers == undefined) {
-                        var spot = source.findContainerSpot();
-                        if (spot != undefined) {
-                            this.createConstructionSite(spot.x, spot.y, STRUCTURE_CONTAINER);
-                        }
-                    } else if (containers.length == this.sources.length) {
-                        this.memory.staticMining = true;
-                    }
-                }
                 this.memory.level = this.controller.level;  
             } else {
                 this.memory.level = this.controller.level;
@@ -171,9 +161,9 @@ Room.prototype.roomUpgrade =
             if (this.energyCapacityAvailable >= 550) {
                 this.memory.mining = true;
                 this.memory.minCreeps = {     
-                    UPGRADER	:	2,
+                    UPGRADER	:	1,
                     BUILDER     :   2,
-                    MECHANIC    :   2
+                    MECHANIC    :   1
                 }; 
             }
         }
