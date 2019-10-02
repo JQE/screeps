@@ -4,12 +4,12 @@ module.exports = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
-        if(creep.isWorking && creep.isEmpty) {
-            creep.isWorking = false;
+        if(creep.memory.working && creep.carry.energy == 0) {
+            creep.memory.working = false;
             creep.memory.structure = undefined;
         }
-        if(!creep.isWorking && creep.isFull) {
-            creep.isWorking = true;
+        if(!creep.memory.working && creep.carry.energy == creep.carryCapacity) {
+            creep.memory.working = true;
             creep.memory.structure = undefined;
         }
 
@@ -24,7 +24,12 @@ module.exports = {
             }
         }
         else {
-            creep.getEnergy(true,creep.memory.usesource);
+            if (creep.memory.remote != creep.room.name) {
+                var exit = creep.room.findExitTo(creep.memory.remote);
+                creep.moveTo(creep.pos.findClosestByRange(exit)); 
+            } else {
+                creep.getEnergy(true,true);
+            }
         }
 	},
 	parts: function(level) {

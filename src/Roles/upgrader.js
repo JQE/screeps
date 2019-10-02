@@ -3,16 +3,16 @@ module.exports = {
     /** @param {Creep} creep **/
     run: function(creep) {
 
-        if(creep.memory.working && creep.carry.energy == 0) {
-            creep.memory.working = false;
+        if(creep.isWorking && creep.isEmpty) {
+            creep.isWorking = false;
             creep.memory.structure = undefined;
         }
-        if(!creep.memory.working && creep.isFull) {
-            creep.memory.working = true;
+        if(!creep.isWorking && creep.isFull) {
+            creep.isWorking = true;
             creep.memory.structure = undefined;
         }
 
-        if(creep.memory.working) {
+        if(creep.isWorking) {
             if (creep.room.controller.sign && creep.room.controller.sign.username != "Workerbe") {
                 if (creep.signController(creep.room.controller, "DaBee was Here!") == ERR_NOT_IN_RANGE) {
                     creep.moveTo(creep.room.controller);

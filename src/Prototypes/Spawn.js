@@ -23,3 +23,20 @@ StructureSpawn.prototype.newMiner =
         var name = "Miner"+Game.time;
         if (this.spawnCreep(parts, name, {memory: {role: "MINER", working: false, sourceId: source}}));
     }
+
+StructureSpawn.prototype.newRemote =
+    function(role, target, home, level) {
+        // create a body with the 2 carry per move
+        var body = Common.REMOTE_ROLES[role].parts(level);
+            
+        // create creep with the created body
+        var name = role+Game.time;
+        if (this.spawnCreep(body, name, {memory: {
+            role: role,
+            home: home,
+            remote: target,
+            working: false
+        }}) == OK) {
+            return name;
+        }
+    }

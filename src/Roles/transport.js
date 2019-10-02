@@ -2,13 +2,12 @@ module.exports = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
-        if (creep.memory.working && creep.carry.energy == 0) {
-            creep.memory.working = false;
+        if(creep.isWorking && creep.isEmpty) {
+            creep.isWorking = false;
             creep.memory.structure = undefined;
         }
-
-        if (!creep.memory.working && creep.isFull) {
-            creep.memory.working = true;
+        if(!creep.isWorking && creep.isFull) {
+            creep.isWorking = true;
             creep.memory.structure = undefined;
         }
 
@@ -28,7 +27,7 @@ module.exports = {
                     var containers = drop.pos.findInRange(FIND_STRUCTURES, 0);
                     if (containers == undefined || containers.length <= 0) {
                         if(creep.pickup(drop) == ERR_NOT_IN_RANGE) {
-                            creep.moveTo(drop);
+                            creep.moveTo(drop, {maxRooms: 1});
                             return;
                         }
                     }
@@ -58,7 +57,7 @@ module.exports = {
                 // try to withdraw energy, if the container is not in range
                 if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     // move towards it
-                    creep.moveTo(container);
+                    creep.moveTo(container, {maxRooms: 1});
                 }
             }
                        

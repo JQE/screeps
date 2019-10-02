@@ -2,7 +2,11 @@ var Common = require('Common_Constants');
 
 Creep.prototype.runRole = 
     function() {
-        Common.ROLES[this.memory.role].run(this);
+        if (this.memory.role.charAt(0) == "R" ) {
+            Common.REMOTE_ROLES[this.memory.role].run(this);
+        } else {
+            Common.ROLES[this.memory.role].run(this);
+        }
     };
 
 
@@ -12,6 +16,28 @@ Object.defineProperty(Creep.prototype, 'isFull', {
             this._isFull = _.sum(this.carry) === this.carryCapacity;
         }
         return this._isFull;
+    },
+    enumerable: false,
+    configurable: true
+});
+
+Object.defineProperty(Creep.prototype, 'isEmpty', {
+    get: function() {
+        if (!this._isEmpty) {
+            this._isEmpty = _.sum(this.carry) === 0;
+        }
+        return this._isEmpty;
+    },
+    enumerable: false,
+    configurable: true
+})
+
+Object.defineProperty(Creep.prototype, 'isWorking', {
+    get: function() {
+        return this.memory.working;
+    },
+    set: function(value) {
+        this.memory.working = value;
     },
     enumerable: false,
     configurable: true

@@ -4,6 +4,7 @@ var credentials = require('./credentials.js');
 var rename = require('gulp-rename'); 
 var clean = require('gulp-clean');
 var log = require('fancy-log');
+var replace = require('gulp-replace');
 
 gulp.task('clean', function() {
     return gulp.src('./dist/*.js', {read: false})
@@ -22,6 +23,16 @@ gulp.task('rename', function() {
     }))
     .pipe(gulp.dest("./dist"));
 });
+
+gulp.task('replace', function() {
+    return gulp.src('./dist/*.js')
+    .pipe(replace(/require\('(.*?)'/g, function(match, p1, offset,string)  {
+        var newVal = match.replace(/\\/g,'_');
+        newVal = newVal.replace(/\//g, '_');
+        return newVal;
+    }))
+    .pipe(gulp.dest("./dist"));
+})
 
 gulp.task('screeps', function() {
     return gulp.src('./dist/*.js')

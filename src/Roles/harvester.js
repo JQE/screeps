@@ -2,16 +2,14 @@ module.exports = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
-        if (creep.memory.working && creep.carry.energy == 0) {
-            creep.memory.working = false;
+        if(creep.isWorking && creep.isEmpty) {
+            creep.isWorking = false;
             creep.memory.structure = undefined;
         }
-
-        if (!creep.memory.working && creep.carry.energy == creep.carryCapacity) {
-            creep.memory.working = true;
+        if(!creep.isWorking && creep.isFull) {
+            creep.isWorking = true;
             creep.memory.structure = undefined;
         }
-
         if (creep.memory.working) {
             if (creep.memory.structure) {
                 var structure = Game.getObjectById(creep.memory.structure);

@@ -11,5 +11,11 @@ module.exports = {
     },
     SPAWN_LIST : [
         "TRANSPORT","HARVESTER","UPGRADER","BUILDER","MECHANIC"
-    ]
+    ],
+    REMOTE_ROLES: {
+        "RMINER"        :   require('Roles_Remote_Miner'),
+        "RBUILDER"      :   require('Roles_Remote_Builder'),
+        "RRESERVER"     :   require('Roles_Remote_Reserver'),
+        "RTRANSPORT"    :   require('Roles_Remote_Transport')
+    }
 }

@@ -219,6 +219,30 @@ Object.defineProperty(Room.prototype, 'freeSpaceCount', {
     configurable: true
 });
 
+Room.prototype.spawnRemote =
+    function(spawn) {
+        var name = undefined;
+        if (this.memory.remote != undefined) {
+            for (let ROLE of Object.keys(Common.REMOTE_ROLES)) {
+                if (this.memory.remote[ROLE] != undefined) {
+                    var info = this.memory.remote[ROLE];
+                    for (let roomName in info) {
+                        var infoCount = info[roomName];
+                        var count = _.sum(Game.creeps, (c) => 
+                            c.memory.role == ROLE && c.memory.remote == roomName);
+                        if (count < infoCount) {
+                            name = spawn.newRemote(ROLE, roomName, this.name, this.controller.level);
+                            if (name != undefined) {
+                                console.log("Spawning Remote with name "+name);
+                                return;
+                            }                    
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 Room.prototype.spawnCreepsIfNecessary =
 function () {    
     var spawns = this.find(FIND_STRUCTURES, {filter: s=> s.structureType == STRUCTURE_SPAWN});    
@@ -328,6 +352,8 @@ function () {
             }
             if (name != undefined) {
                 console.log("Spawning new creep with name :"+name);
+            } else {
+                this.spawnRemote(spawn);
             }
         }
     }

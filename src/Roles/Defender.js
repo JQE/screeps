@@ -6,7 +6,7 @@ module.exports = {
             var rampart = creep.pos.findClosestByRange(FIND_STRUCTURES, {filter: (s) => {s.structureType == STRUCTURE_RAMPART}});
             var creepRange = creep.pos.getRangeTo(closestHostile);
             if (creepRange > 3 || !rampart || (rampart && !creep.pos.isEqualTo(rampart))) {
-                creep.moveTo(closestHostile);
+                creep.moveTo(closestHostile, {maxRooms: 1});
             }
             if (creepRange == 1 && creep.getActiveBodyparts(ATTACK) > 0) {
                 creep.attack(closestHostile);

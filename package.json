@@ -14,8 +14,7 @@
     "gulp-screeps": "^1.0.8",
     "fancy-log": "^1.3.3",
     "gulp-rename": "^1.4.0",
-    "gulp-replace": "^1.0.0",
+    "gulp-replace": "^1.0.0"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }
