@@ -169,29 +169,6 @@ Room.prototype.roomUpgrade =
         }
     }
     
-
-Object.defineProperty(Room.prototype, 'mineralType', {
-    get: function() {
-        if (this._freeSpaceCount == undefined) {
-            if (this.memory.freeSpaceCount == undefined) {
-                let freeSpaceCount = 0;
-                for (var source of this.sources) {
-                    [source.pos.x - 1, source.pos.x, source.pos.x + 1].forEach(x => {
-                        [source.pos.y - 1, source.pos.y, source.pos.y + 1].forEach(y => {
-                            if (Game.map.getTerrainAt(x, y, this.name) != 'wall')
-                                    freeSpaceCount++;
-                                }, this);
-                        }, this);                    
-                }
-                this.memory.freeSpaceCount = freeSpaceCount;
-            }
-            this._freeSpaceCount = this.memory.freeSpaceCount;
-        }
-        return this._freeSpaceCount;
-    },
-    enumerable: false,
-    configurable: true
-});
 Object.defineProperty(Room.prototype, 'freeSpaceCount', {
     get: function () {
         if (this._freeSpaceCount == undefined) {
@@ -200,10 +177,14 @@ Object.defineProperty(Room.prototype, 'freeSpaceCount', {
                 for (var source of this.sources) {
                     [source.pos.x - 1, source.pos.x, source.pos.x + 1].forEach(x => {
                         [source.pos.y - 1, source.pos.y, source.pos.y + 1].forEach(y => {
-                            if (Game.map.getTerrainAt(x, y, this.name) != 'wall')
+                            var spots = this.room.lookAt(x, y);
+                            for (let spot of spots) {
+                                if ((spot.type != "terrain") ||(spot.type == "terrain" && spot.terrain != "wall")) {
                                     freeSpaceCount++;
-                                }, this);
-                        }, this);                    
+                                }
+                            }      
+                        }, this);
+                    }, this);                    
                 }
                 this.memory.freeSpaceCount = freeSpaceCount;
             }

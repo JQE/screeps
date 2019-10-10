@@ -53,9 +53,9 @@ Creep.prototype.getEnergy =
         let container;
 
         if (useContainer) {
-            if (this.room.storage) {
+            if (this.room.storage && this.room.controller && this.room.controller.level >= 4) {
                 container = true;
-                if (this.room.storage.store[RESOURCE_ENERGY] > this.carryCapacity) {                    
+                if (this.room.storage.store[RESOURCE_ENERGY] > this.carryCapacity) {  
                     container = this.room.storage;
                 }
             } else {
