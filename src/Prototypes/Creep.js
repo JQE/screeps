@@ -61,14 +61,14 @@ Creep.prototype.getEnergy =
             } else {
                 if (this.memory.structure) {
                     var item = Game.getObjectById(this.memory.structure);
-                    if (item && item.store[RESOURCE_ENERGY] > this.carryCapacity) {
+                    if (item && item.store[RESOURCE_ENERGY] > 100) {
                         container = item;
                     } else {
                         delete this.memory.structure;
                     }                    
                 }
                 if (this.memory.structure == undefined) {
-                    var item = this.pos.findClosestByPath(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_CONTAINER && s.store[RESOURCE_ENERGY] > this.carryCapacity});
+                    var item = this.pos.findClosestByPath(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_CONTAINER && s.store[RESOURCE_ENERGY] > 100});
                     if (item) {
                         this.memory.structure = item.id;
                         container = item;                        
@@ -78,39 +78,98 @@ Creep.prototype.getEnergy =
         }
         if (container) {
             if (this.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                this.moveTo(container);
+                this.moveTo(container, {maxRooms: 1});
             }
         } else if (useSource) {
             var source = this.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
             if (this.harvest(source) == ERR_NOT_IN_RANGE) {
-                this.moveTo(source);
+                this.moveTo(source, {maxRooms: 1});
             }
         }
     };
 
 Creep.prototype.findEnergyTarget =
     function() {
-        var target = this.pos.findClosestByPath(FIND_STRUCTURES, {
+        var towers = this.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: (structure) => {
-                return (structure.structureType == STRUCTURE_EXTENSION ||
-                        structure.structureType == STRUCTURE_SPAWN) && structure.energy < structure.energyCapacity;
+                return (structure.structureType == STRUCTURE_TOWER) && structure.energy < (structure.energyCapacity/2);
             }
         });
-        if(target) {
-            this.memory.structure = target.id;
+        if (towers) {
+            this.memory.structure = towers.id;
         } else {
-            var lab = this.pos.findClosestByPath(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_LAB && !s.isFull});
-            if (lab) {
-                this.memory.structure = lab.id;
+            var target = this.pos.findClosestByPath(FIND_STRUCTURES, {
+                filter: (structure) => {
+                    return (structure.structureType == STRUCTURE_EXTENSION ||
+                            structure.structureType == STRUCTURE_SPAWN) && structure.energy < structure.energyCapacity;
+                }
+            });
+            if(target) {
+                this.memory.structure = target.id;
             } else {
-                var towers = this.pos.findClosestByPath(FIND_STRUCTURES, {
-                    filter: (structure) => {
-                        return (structure.structureType == STRUCTURE_TOWER) && !structure.isFull;
+                var lab = this.pos.findClosestByPath(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_LAB && !s.isFull});
+                if (lab) {
+                    this.memory.structure = lab.id;
+                } else {
+                    var towers = this.pos.findClosestByPath(FIND_STRUCTURES, {
+                        filter: (structure) => {
+                            return (structure.structureType == STRUCTURE_TOWER) && structure.energy < structure.energyCapacity
+                        }
+                    });
+                    if (towers) {
+                        this.memory.structure = towers.id;
                     }
-                });
-                if (towers) {
-                    this.memory.structure = towers.id;
                 }
             }
         }
+    }
+
+Creep.prototype.renew = 
+    function() {
+        if (this.getActiveBodyparts(CLAIM) >= 1) {
+            return false;
+        }
+        if (this.memory.renew == true) {
+            if (this.memory.home && this.room != this.memory.home) {
+                var exit = this.room.findExitTo(this.memory.home);
+                this.moveTo(this.pos.findClosestByRange(exit));
+            } else {
+                this.say("Renewing");
+                if (this.memory.structure) {
+                    var s = Game.getObjectById(this.memory.structure);
+                    if (s.structureType == STRUCTURE_SPAWN) {
+                        if (this.pos.isNearTo(s)) {
+                            if (!s.spawning) {
+                                s.renewCreep(this);
+                            }
+                        } else {
+                            this.moveTo(s);
+                        }
+                    } else {
+                        this.memory.structure = undefined;
+                    }
+                } else {
+                    var s = this.pos.findClosestByPath(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_SPAWN});
+                    if (s) { this.memory.structure = s.id; };
+                    if (this.pos.isNearTo(s)) {
+                        if (!s.spawning) {
+                            s.renewCreep(this);
+                        }
+                    } else {
+                        this.moveTo(s);
+                    }
+                }
+            }
+        }
+        if (this.memory.renew == undefined) {
+            this.memory.renew = false;
+        }
+        
+        if (this.ticksToLive < 50) {
+            this.memory.renew = true;          
+        } else if (this.ticksToLive >= CREEP_LIFE_TIME) {
+            this.memory.renew = false;
+        }  
+        
+        return this.memory.renew;      
     }

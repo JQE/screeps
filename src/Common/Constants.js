@@ -7,15 +7,21 @@ module.exports = {
         "TRANSPORT"     :   require('Roles_Transport'),
         "MINER"         :   require('Roles_Miner'),
         "HARVESTER"     :   require('Roles_Harvester'),
-        "DEFENDER"      :   require('Roles_Defender')
+        "DEFENDER"      :   require('Roles_Defender'),
+        "HEALER"        :   require('Roles_Healer'),
     },
     SPAWN_LIST : [
         "TRANSPORT","HARVESTER","UPGRADER","BUILDER","MECHANIC"
     ],
-    REMOTE_ROLES: {
+    REMOTE_ROLES: {        
+        "RDEFENDER"     :   require('Roles_Remote_Defender'),
         "RMINER"        :   require('Roles_Remote_Miner'),
         "RBUILDER"      :   require('Roles_Remote_Builder'),
         "RRESERVER"     :   require('Roles_Remote_Reserver'),
-        "RTRANSPORT"    :   require('Roles_Remote_Transport')
-    }
+        "RTRANSPORT"    :   require('Roles_Remote_Transport'),
+        "RMECHANIC"     :   require('Roles_Remote_Mechanic')
+    },
+    REMOTE_LIST: [
+        "RMINER","RBUILDER","RRESERVER","RTRANSPORT","RMECHANIC"
+    ]
 }

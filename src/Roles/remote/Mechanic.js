@@ -1,5 +1,3 @@
-var roleMechanic = require('Roles_Mechanic');
-
 module.exports = {
 
     /** @param {Creep} creep **/
@@ -14,13 +12,12 @@ module.exports = {
         }
 
         if(creep.memory.working) {
-            var target = creep.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
-            if (target) {
-                if(creep.build(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target);
+            var targets = creep.room.find(FIND_STRUCTURES, {filter: s => s.hits < s.hitsMax});
+            if (targets && targets.length > 0) {
+                targets.sort((a,b) => a.hits < b.hits);
+                if(creep.repair(targets[0]) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(targets[0]);
                 }
-            } else {
-                roleMechanic.run(creep);
             }
         }
         else {

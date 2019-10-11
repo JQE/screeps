@@ -24,7 +24,7 @@ module.exports = {
             } else {
                 var rampartDamage = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
                     filter: (structure) => {
-                        return structure.hits < structure.hitsMax && structure.structureType == STRUCTURE_RAMPART
+                        return structure.hits < structure.hitsMax && structure.hits < 1000000 && structure.structureType == STRUCTURE_RAMPART
                     }
                 });
                 if (rampartDamage) {

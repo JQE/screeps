@@ -4,6 +4,9 @@ module.exports = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
+        if (creep.memory.renew) {
+            creep.renew();
+        }
         if(creep.isWorking && creep.isEmpty) {
             creep.isWorking = false;
             creep.memory.structure = undefined;

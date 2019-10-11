@@ -16,10 +16,10 @@ StructureTower.prototype.fix =
         var target = undefined;
         var targets = this.room.find(FIND_STRUCTURES, { 
             filter: s => 
-            (s.hits < s.hitsMax && s.structureType != STRUCTURE_POWER_BANK && s.structureType != STRUCTURE_KEEPER_LAIR)
+            (s.hits < s.hitsMax && s.hits < 1000000 && s.structureType != STRUCTURE_POWER_BANK && s.structureType != STRUCTURE_KEEPER_LAIR)
         })
         if (targets && targets.length > 0) {
-            targets.sort((a,b) => a.hits - b.hits);
+            targets.sort((a,b) => a.hits - b.hits);            
             target = targets[0];
         }
         if (target != undefined) {

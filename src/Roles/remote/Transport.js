@@ -31,11 +31,11 @@ module.exports = {
                 if (source != undefined || creep.room.storage) {
                     if (source && distance < creep.pos.findPathTo(creep.room.storage).length) {
                         if (creep.transfer(source, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                            creep.moveTo(source);
+                            creep.moveTo(source, {maxRooms: 1});
                         }
                     } else {
                         if( creep.transfer(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                            creep.moveTo(creep.room.storage);
+                            creep.moveTo(creep.room.storage, {maxRooms: 1});
                         }
                     }
                 } else  {
@@ -43,7 +43,7 @@ module.exports = {
                         var structure = Game.getObjectById(creep.memory.structure);
                         if (structure && structure.energy < structure.energyCapacity) {
                                 if (creep.transfer(structure, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                                    creep.moveTo(structure);
+                                    creep.moveTo(structure, {maxRooms: 1});
                                 }
                         } else {
                             creep.findEnergyTarget();
@@ -55,8 +55,18 @@ module.exports = {
             }  
         } else {
             if (creep.memory.remote == creep.room.name) {
-                creep.getEnergy(true, false);                
+                if (creep.memory.arrived == false) {
+                    var flag = creep.room.find(FIND_FLAGS);
+                    if (creep.pos.getRangeTo(flag[0]) <= 4) {
+                        creep.memory.arrived = true;
+                    } else {
+                        creep.moveTo(flag[0], {maxRooms: 1});
+                    }
+                } else {
+                    creep.getEnergy(true, false);                
+                }
             } else {
+                creep.memory.arrived = false;
                 var exit = creep.room.findExitTo(creep.memory.remote);
                 creep.moveTo(creep.pos.findClosestByRange(exit)); 
             }

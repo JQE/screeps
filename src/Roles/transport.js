@@ -20,12 +20,14 @@ module.exports = {
                 }
             }
         } else {
-            var container = {};
-            var dropped = creep.room.find(FIND_DROPPED_RESOURCES);
-            if (dropped && dropped.length > 0) {
-                for (let drop of dropped) {
-                    var containers = drop.pos.findInRange(FIND_STRUCTURES, 0);
-                    if (containers == undefined || containers.length <= 0) {
+            var container = undefined;
+            if (creep.memory.structure) {
+                container = Game.getObjectById(creep.memory.structure);
+            }
+            if (container == undefined) {            
+                var dropped = creep.room.find(FIND_DROPPED_RESOURCES);
+                if (dropped && dropped.length > 0) {
+                    for (let drop of dropped) {
                         if(creep.pickup(drop) == ERR_NOT_IN_RANGE) {
                             creep.moveTo(drop, {maxRooms: 1});
                             return;
@@ -33,11 +35,13 @@ module.exports = {
                     }
                 }
             }
-            container = creep.pos.findClosestByPath(FIND_TOMBSTONES, {
-                filter: (stone) => {
-                    return stone.store[RESOURCE_ENERGY] > creep.carryCapacity 
-                }
-            });
+            if (container == undefined) {
+                container = creep.pos.findClosestByPath(FIND_TOMBSTONES, {
+                    filter: (stone) => {
+                        return stone.store[RESOURCE_ENERGY] > creep.carryCapacity 
+                    }
+                });
+            }
 
             if (container == undefined && creep.room.memory.link) {
                 var link = Game.getObjectById(creep.room.memory.link.target);
@@ -54,6 +58,7 @@ module.exports = {
 
             // if one was found
             if (container != undefined) {
+                creep.memory.structure = container.id;
                 // try to withdraw energy, if the container is not in range
                 if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     // move towards it

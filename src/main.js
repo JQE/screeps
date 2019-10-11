@@ -22,7 +22,9 @@ module.exports.loop = function() {
     /**@type {Array.<Creep>} */
     for (let name in Game.creeps) {
         // run creep logic
-        Game.creeps[name].runRole();
+        //if (Game.creeps[name].renew() == false) {
+            Game.creeps[name].runRole();
+        //}
     }
 
     /**@type {Array.<StructureLink>} */
