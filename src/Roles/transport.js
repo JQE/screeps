@@ -21,39 +21,57 @@ module.exports = {
             }
         } else {
             var container = undefined;
+            var option = undefined;
+            var range = 999;  
             if (creep.memory.structure) {
                 container = Game.getObjectById(creep.memory.structure);
+                if ((container.energy && container.energy) < creep.carryCapacity || (container.store && container.store[RESOURCE_ENERGY] < creep.carryCapacity)) {
+                    container = undefined;
+                }             
             }
             if (container == undefined) {            
-                var dropped = creep.room.find(FIND_DROPPED_RESOURCES);
-                if (dropped && dropped.length > 0) {
-                    for (let drop of dropped) {
-                        if(creep.pickup(drop) == ERR_NOT_IN_RANGE) {
-                            creep.moveTo(drop, {maxRooms: 1});
-                            return;
+                var dropped = creep.pos.findClosestByPath(FIND_DROPPED_RESOURCES, {maxRooms: 1});
+                if (dropped) {
+                    //for (let drop of dropped) {
+                        //var containers = drop.pos.findInRange(FIND_STRUCTURES, 0, {filter: s => s.structureType == STRUCTURE_CONTAINER});
+                        //if (containers == undefined || containers.length == 0) {
+                            if(creep.pickup(dropped) == ERR_NOT_IN_RANGE) {
+                                creep.moveTo(dropped, {maxRooms: 1});
+                                return;
+                            }
+                       // }
+                   // }
+                }
+                     
+                option = creep.pos.findClosestByPath(FIND_TOMBSTONES, {
+                    filter: (stone) => stone.store[RESOURCE_ENERGY] > creep.carryCapacity
+                });
+
+                var distance = creep.pos.getRangeTo(option);
+                if (range > distance) {
+                    range = distance;
+                    container = option;
+                }
+
+                if (creep.room.memory.link) {
+                    var link = Game.getObjectById(creep.room.memory.link.target);
+                    if (link.energy > 0) {
+                        distance = creep.pos.getRangeTo(link);
+                        if (range > distance) {
+                            range = distance;
+                            container = link;
                         }
                     }
                 }
-            }
-            if (container == undefined) {
-                container = creep.pos.findClosestByPath(FIND_TOMBSTONES, {
-                    filter: (stone) => {
-                        return stone.store[RESOURCE_ENERGY] > creep.carryCapacity 
-                    }
+                
+                option = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+                    filter: s => s.structureType == STRUCTURE_CONTAINER && s.store[RESOURCE_ENERGY] > creep.carryCapacity
                 });
-            }
-
-            if (container == undefined && creep.room.memory.link) {
-                var link = Game.getObjectById(creep.room.memory.link.target);
-                if (link.energy > (creep.carryCapacity/2)) {
-                    container = link;
+                distance = creep.pos.getRangeTo(option);            
+                if (range > distance) {
+                    range = distance;
+                    container = option;
                 }
-            }
-
-            if (container == undefined) {
-                container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-                    filter: s => s.structureType == STRUCTURE_CONTAINER && s.store[RESOURCE_ENERGY] > 99
-                });
             }
 
             // if one was found
@@ -72,6 +90,6 @@ module.exports = {
         if (level < 3) {
             return [WORK,MOVE,CARRY];
         }
-	    return [CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE];
+	    return [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE];
 	}
 };

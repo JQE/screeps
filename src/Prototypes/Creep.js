@@ -68,7 +68,7 @@ Creep.prototype.getEnergy =
                     }                    
                 }
                 if (this.memory.structure == undefined) {
-                    var item = this.pos.findClosestByPath(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_CONTAINER && s.store[RESOURCE_ENERGY] > 100});
+                    var item = this.pos.findClosestByPath(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_CONTAINER && s.store[RESOURCE_ENERGY] >= this.carryCapacity});
                     if (item) {
                         this.memory.structure = item.id;
                         container = item;                        
