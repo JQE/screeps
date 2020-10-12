@@ -63,6 +63,17 @@ export class Remote {
             var role = this.roles[key];
             role.Load(false);
         }
+        let room = Game.rooms[this.roomName];
+        if (room) {
+            let core = room.find(FIND_HOSTILE_STRUCTURES, { filter: (core) => core.structureType == STRUCTURE_INVADER_CORE});
+            if (core && this.remoteLimits[ROLE_REMOTE_DEFENDER] !== 3) {
+                this.remoteLimits[ROLE_REMOTE_DEFENDER] = 3;
+                this.colony.population.coreIncrease();
+            } else if (this.remoteLimits[ROLE_REMOTE_DEFENDER] !== 1) {
+                this.remoteLimits[ROLE_REMOTE_DEFENDER] = 1;
+                this.colony.population.coreDecrease();
+            }
+        }
     }
 
     public Update(): void {

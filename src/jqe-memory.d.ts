@@ -27,6 +27,7 @@ export interface RemoteClaimerMemory extends RoleMemory {
 
 export interface RemoteDefenderMemory extends RoleMemory {
     targetId?: Id<Creep>;
+    coreId?: Id<StructureInvaderCore>;
     arrived: boolean;
     targetRoom: string;
     hq: string;

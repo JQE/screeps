@@ -1,11 +1,12 @@
 import { Role } from "Creep/Templates/Role";
-import { ScoutLocation, RemoteDefenderMemory } from "jqe-memory";
-import { threadId } from "worker_threads";
+import { RemoteDefenderMemory } from "jqe-memory";
 
 export class RDefender extends Role {
     public static fromMemory(memory: RemoteDefenderMemory): RDefender {
         let rdefender = new this(memory.working, memory.finished, memory.hq, memory.targetRoom, memory.creepId);
         rdefender.arrived = memory.arrived;
+        rdefender.targetId = memory.targetId;
+        rdefender.coreId = memory.coreId;
         return rdefender;
     }
 
@@ -18,15 +19,20 @@ export class RDefender extends Role {
     private hq: string;
     private targetRoom: string;
     private targetId?: Id<Creep>;
+    private coreId?: Id<StructureInvaderCore>;
     private arrived: boolean = false;
 
     private flag?: Flag;
     private target?: Creep | null;
+    private core?: StructureInvaderCore | null;
     private inRoom: boolean = false;
 
     public onLoad(): void{
        if (this.targetId) {
             this.target = Game.getObjectById(this.targetId);
+       }
+       if (this.coreId) {
+           this.core = Game.getObjectById(this.coreId);
        }
        for (let key in Game.flags) {
            let flag = Game.flags[key];
@@ -69,7 +75,16 @@ export class RDefender extends Role {
 
     public onExecute(): void {
         if (this.creep) {
-            if (this.target) {
+            if (this.core) {
+                var range = this.creep.pos.getRangeTo(this.core);
+                if (range > 3) {
+                    this.creep.travelTo(this.core);
+                } else if (range > 1 && range <= 3) {
+                    this.creep.rangedAttack(this.core);
+                } else {
+                    this.creep.attack(this.core);
+                }
+            } else if (this.target) {
                 var range = this.creep.pos.getRangeTo(this.target);
                 if (range > 3) {
                     this.creep.travelTo(this.target);
@@ -92,6 +107,13 @@ export class RDefender extends Role {
 
     private findTarget(): boolean {
         if (this.creep) {
+            let core = this.creep.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES, {
+                filter: (core) => core.room.name == this.creep?.room.name
+            }) as StructureInvaderCore;
+            if (core) {
+                this.core = core;
+                this.coreId = core.id;
+            }
             let creep = this.creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS, {
                 filter: (creep) => creep.room.name === this.creep?.room.name
             });
@@ -108,6 +130,7 @@ export class RDefender extends Role {
         let mem = super.Save() as RemoteDefenderMemory;
         mem.hq = this.hq;
         mem.targetId = this.targetId;
+        mem.coreId = this.coreId;
         mem.arrived = this.arrived;
         mem.targetRoom = this.targetRoom;
         return mem;

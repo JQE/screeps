@@ -136,6 +136,14 @@ export class Population {
         this.limits[BODY_DEFENDER] = 0;
     }
 
+    public coreDecrease(): void {
+        this.limits[BODY_REMOTE_DEFENDER] -= 2;
+    }
+
+    public coreIncrease(): void {
+        this.limits[BODY_REMOTE_DEFENDER] += 2;
+    }
+
     public addRemote(): void {
         this.remoteCount++;
         this.limits[BODY_REMOTE_MINER] = this.remoteCount*2;
