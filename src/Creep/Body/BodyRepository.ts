@@ -20,9 +20,21 @@ export class BodyRepository {
                 return this.Defender();
             case BODY_REMOTE_DEFENDER:
                 return this.RemoteDefender();
+            case BODY_REMOTE_CLAIMER:
+                return this.RemoteClaimer();
             default:
                 return null;
         }
+    }
+
+    public static RemoteClaimer(): Body {
+        return new Body(
+            BODY_REMOTE_CLAIMER,
+            700,
+            [TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,MOVE,CLAIM],
+            [TOUGH,TOUGH,MOVE,CLAIM],
+            false
+        );
     }
 
     public static RemoteDefender(): Body {

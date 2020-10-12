@@ -140,6 +140,7 @@ export class Population {
         this.remoteCount++;
         this.limits[BODY_REMOTE_MINER] = this.remoteCount*2;
         this.limits[BODY_REMOTE_DEFENDER] = this.remoteCount;
+        this.limits[BODY_REMOTE_CLAIMER] = this.remoteCount;
     }
 
     public addScout(): void {

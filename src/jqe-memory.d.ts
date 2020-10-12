@@ -18,6 +18,13 @@ export interface ScoutMemory extends RoleMemory {
     arrived: boolean;
 }
 
+export interface RemoteClaimerMemory extends RoleMemory {
+    targetRoom: string;
+    hq: string;
+    arrived: boolean;
+    controllerId?: Id<StructureController>;
+}
+
 export interface RemoteDefenderMemory extends RoleMemory {
     targetId?: Id<Creep>;
     arrived: boolean;

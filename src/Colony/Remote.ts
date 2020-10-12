@@ -1,10 +1,11 @@
 
 import { RemoteRepository } from "../Creep/Remote/RemoteRepository"
 import { Role } from "Creep/Templates/Role";
-import { RemoteDefenderMemory, RemoteMemory, RMinerMemory } from "jqe-memory";
+import { RemoteClaimerMemory, RemoteDefenderMemory, RemoteMemory, RMinerMemory } from "jqe-memory";
 import { Colony } from "./Colony";
 import { RMiner } from "Creep/Remote/rminer";
 import { RDefender } from "Creep/Remote/RDefender";
+import { RClaimer } from "Creep/Remote/RClaimer";
 
 export class Remote {
     public static fromMemory(memory: RemoteMemory, colony: Colony): Remote {
@@ -19,6 +20,9 @@ export class Remote {
                     break;
                 case ROLE_REMOTE_DEFENDER:
                     remote.roles.push(RDefender.fromMemory(role as RemoteDefenderMemory));
+                    break;
+                case ROLE_REMOTE_CLAIMER:
+                    remote.roles.push(RClaimer.fromMemory(role as RemoteClaimerMemory));
                     break;
                 default:
 
@@ -65,13 +69,15 @@ export class Remote {
         for (var key in this.roles) {
             var role = this.roles[key];
             if (role.needsCreep()) {
-                var creep = this.colony.population.getCreep(role.body);
-                if (creep) {
-                    if (role.assignCreep(creep.id)) {
-                        creep.memory.role = role.type;
-                    } else if (role.finished) {
-                        var index = this.roles.indexOf(role);
-                        this.roles.splice(index, 1);
+                if (role.finished) {
+                    var index = this.roles.indexOf(role);
+                    this.roles.splice(index, 1);
+                } else {
+                    var creep = this.colony.population.getCreep(role.body);
+                    if (creep) {
+                        if (role.assignCreep(creep.id)) {
+                            creep.memory.role = role.type;
+                        }
                     }
                 }
             }
@@ -96,6 +102,7 @@ export class Remote {
     public Init(): void {
         this.remoteLimits[ROLE_REMOTE_MINER] = 2;
         this.remoteLimits[ROLE_REMOTE_DEFENDER] = 1;
+        this.remoteLimits[ROLE_REMOTE_CLAIMER] = 1;
     }
 
     public Save(): RemoteMemory {

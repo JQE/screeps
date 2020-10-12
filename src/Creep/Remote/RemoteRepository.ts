@@ -1,4 +1,5 @@
 import { Role } from "../Templates/Role";
+import { RClaimer } from "./RClaimer";
 import { RDefender } from "./RDefender";
 import { RMiner } from "./rminer";
 
@@ -12,6 +13,10 @@ export class RemoteRepository {
             default:
                 return null;
         }
+    }
+
+    public static RClaimer(targetRoom:string, parentRoomName: string) {
+        return new RClaimer(false, false, targetRoom, parentRoomName);
     }
 
     public static RDefender(targetRoom: string, parentRoomName: string) {
