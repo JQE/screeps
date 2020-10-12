@@ -15,6 +15,10 @@ interface RoomMemory {
   avoid?: number;
 }
 
+interface LinkMemory {
+  source: boolean;
+}
+
 interface Memory {
   uuid: number;
   log: any;

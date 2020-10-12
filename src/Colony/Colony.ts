@@ -2,7 +2,8 @@ import { Builder, Harvester, Hauler, Mechanic, Miner , RoleRepository, Upgrader 
 import { Defender } from "Creep/Roles/Defender";
 import { Scout } from "Creep/Roles/Scout";
 import { Role } from "Creep/Templates/Role";
-import { BuilderMemory, ColonyMemory,DefenderMemory,HarvesterMemory,HaulerMemory,MechanicMemory,MinerMemory, RemoteMemory, ScoutMemory, UpgraderMemory } from "jqe-memory";
+import { BuilderMemory, ColonyMemory,DefenderMemory,HarvesterMemory,HaulerMemory,LinkSetMemory,MechanicMemory,MinerMemory, RemoteMemory, ScoutMemory, UpgraderMemory } from "jqe-memory";
+import { LinkSet } from "Link/LinkSet";
 import { Spawner } from "Spawn/Spawner";
 import { Tower } from "Tower/Tower";
 import { Population } from "./Population";
@@ -18,6 +19,9 @@ export class Colony {
         for (let key in memory.towers) {
             let towerMemory = memory.towers[key];
             colony.towers.push(Tower.fromMemory(towerMemory));
+        }
+        for (let key in memory.linkSets) {
+            colony.linkSets.push(LinkSet.fromMemory(memory.linkSets[key] as LinkSetMemory));
         }
         for (let key in memory.remotes) {
             let remote = memory.remotes[key];
@@ -87,15 +91,23 @@ export class Colony {
     private level: number = 1;
     private minerSpots: MinerSpot[];
     private towers: Tower[] = [];
+    private linkSets: LinkSet[] = [];
     private remotes: Remote[];
 
     public Load(): void {
         this.checkRemote();
         this.addTowers();
+        this.addLinkSet();
         for (let key in this.towers) {
             let tower = this.towers[key];
             if (tower) {
                 tower.Load();
+            }
+        }
+        for (let key in this.linkSets) {
+            let linkSet = this.linkSets[key];
+            if (linkSet) {
+                linkSet.Load();
             }
         }
         if (this.room.controller && this.room.controller.level > this.level) {
@@ -181,6 +193,13 @@ export class Colony {
             }
         }
 
+        for (let key in this.linkSets) {
+            let linkSet = this.linkSets[key];
+            if (linkSet) {
+                linkSet.Update();
+            }
+        }
+
         for (let key in this.remotes) {
             let remote = this.remotes[key];
             if (remote) {
@@ -228,6 +247,13 @@ export class Colony {
             spawner.Execute();
         }
 
+        for (let key in this.linkSets) {
+            let linkSet = this.linkSets[key];
+            if (linkSet) {
+                linkSet.Execute();
+            }
+        }
+
         for (let key in this.remotes) {
             let remote = this.remotes[key];
             if (remote) {
@@ -261,6 +287,13 @@ export class Colony {
             spawner.Cleanup();
         }
 
+        for (let key in this.linkSets) {
+            let linkSet = this.linkSets[key];
+            if (linkSet) {
+                linkSet.Cleanup();
+            }
+        }
+
         for (let key in this.towers) {
             let tower = this.towers[key];
             if (tower) {
@@ -277,6 +310,15 @@ export class Colony {
         for (let key in this.roles) {
             let role = this.roles[key];
             role.Cleanup();
+        }
+        if (this.room.controller) {
+            let visual = new RoomVisual(this.roomName);
+            let percent = Math.round((this.room.controller.progress / this.room.controller.progressTotal)*100);
+            let text = "Controller Level "+this.room.controller.level+" Upgrading: "+percent+"%";
+            let gclp = Math.round((Game.gcl.progress/Game.gcl.progressTotal) * 100);
+            let gclText = "GCL Level "+Game.gcl.level+" Upgrading: "+gclp+"%";
+            visual.text(text, 2, 2, { align: "left", opacity: 0.8});
+            visual.text(gclText, 2,3, { align: "left", opacity: 0.8});
         }
     }
 
@@ -400,6 +442,38 @@ export class Colony {
         }
     }
 
+    private addLinkSet(): void {
+        if (this.room.storage) {
+            if (this.linkSets.length < 1) {
+                let links = this.room.find(FIND_STRUCTURES, {
+                    filter: (structure: StructureLink) => structure.structureType === STRUCTURE_LINK
+                });
+                if (links && links.length >= 2) {
+                    let targetId;
+                    let sourceId:Id<StructureLink>[] = [];
+                    let range = 1000;
+                    for (let link of links) {
+                        let newRange = this.room.storage.pos.getRangeTo(link)
+                        if (newRange < range) {
+                            if (targetId) {
+                                sourceId.push(targetId);
+                            }
+                            targetId = link.id as Id<StructureLink>;
+                            range = newRange;
+                        } else {
+                            sourceId.push(link.id as Id<StructureLink>);
+                        }
+                    }
+                    if (targetId && sourceId) {
+                        let linkSet = new LinkSet(sourceId, targetId);
+                        this.linkSets.push(linkSet);
+                    }
+                }
+            }
+        }
+
+    }
+
     private addTowers(): void {
         let towers = this.room.find(FIND_STRUCTURES, {
             filter: (structure: StructureTower) => structure.structureType === STRUCTURE_TOWER
@@ -438,7 +512,8 @@ export class Colony {
             roleLimits: this.roleLimits,
             level: this.level,
             towers: this.towers.map((p) => p.Save()),
-            remotes: this.getRemoteMemory()
+            remotes: this.getRemoteMemory(),
+            linkSets: this.linkSets.map((p) => p.Save())
         }
     }
 }

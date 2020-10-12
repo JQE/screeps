@@ -51,6 +51,7 @@ export interface RMinerMemory extends RoleMemory {
     arrived: boolean;
     depositId?: DepositTargetIds;
     storageId?: Id<StructureStorage>;
+    linkId?: Id<StructureLink>;
 }
 
 export interface MinerMemory extends RoleMemory {
@@ -112,6 +113,11 @@ export interface TowerMemory {
     towerId: Id<StructureTower>;
 }
 
+export interface LinkSetMemory {
+    sourceId: Id<StructureLink>[];
+    destId: Id<StructureLink>;
+}
+
 export interface RemoteMemory {
     parentName: string;
     roomName: string;
@@ -129,6 +135,7 @@ export interface ColonyMemory {
     roles: RoleMemory[];
     level: number;
     towers: TowerMemory[];
+    linkSets: LinkSetMemory[];
     remotes: { [ remoteName: string]: RemoteMemory};
 }
 

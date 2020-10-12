@@ -10,6 +10,7 @@ export class RMiner extends Role {
         miner.finished = memory.finished;
         miner.depositId = memory.depositId;
         miner.storageId = memory.storageId;
+        miner.linkId = memory.linkId;
         return miner;
     }
 
@@ -26,11 +27,13 @@ export class RMiner extends Role {
     private sourceId?: Id<Source>;
     private depositId?: DepositTargetIds;
     private storageId?: Id<StructureStorage>;
+    private linkId?: Id<StructureLink>;
     private parentRoomName: string;
 
     private source?: Source | null;
     private deposit?: DepositTargets | null;
     private storage?: StructureStorage | null;
+    private link?: StructureLink | null;
     private parentRoom?: Room | null;
 
     protected onLoad(): void {
@@ -50,6 +53,12 @@ export class RMiner extends Role {
             this.storage = Game.getObjectById(this.storageId);
             if (!this.storage || this.storage.store.getFreeCapacity(RESOURCE_ENERGY) <= 50) {
                 delete this.storageId;
+            }
+        }
+        if (this.linkId) {
+            this.link = Game.getObjectById(this.linkId);
+            if (!this.link || this.link.store.getFreeCapacity(RESOURCE_ENERGY) <= 50) {
+                delete this.linkId;
             }
         }
         if (this.parentRoomName) {
@@ -130,24 +139,32 @@ export class RMiner extends Role {
 
     private findDepositTarget() {
         if (this.creep) {
-            if (this.parentRoom && this.parentRoom.storage && this.parentRoom.storage.store.getFreeCapacity(RESOURCE_ENERGY) >= 50) {
-                this.storage = this.parentRoom.storage;
-                this.storageId = this.parentRoom.storage.id;
+            var link = this.creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
+                filter: (structure: StructureLink) => structure.structureType === STRUCTURE_LINK
+            }) as StructureLink;
+            if (link) {
+                this.link = link;
+                this.linkId = link.id;
             } else {
-                var structure = this.creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
-                    filter: (structure: DepositTargets) => (structure.structureType === STRUCTURE_EXTENSION || structure.structureType === STRUCTURE_SPAWN) &&
-                                                            structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
-                }) as DepositTargets;
-                if (structure) {
-                    this.deposit = structure;
-                    this.depositId = structure.id;
+                if (this.parentRoom && this.parentRoom.storage && this.parentRoom.storage.store.getFreeCapacity(RESOURCE_ENERGY) >= 50) {
+                    this.storage = this.parentRoom.storage;
+                    this.storageId = this.parentRoom.storage.id;
                 } else {
-                    var tower = this.creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
-                        filter: (structure:StructureTower) => structure.structureType === STRUCTURE_TOWER && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 50
-                    }) as StructureTower;
-                    if (tower) {
-                        this.deposit = tower;
-                        this.depositId = tower.id;
+                    var structure = this.creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
+                        filter: (structure: DepositTargets) => (structure.structureType === STRUCTURE_EXTENSION || structure.structureType === STRUCTURE_SPAWN) &&
+                                                                structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+                    }) as DepositTargets;
+                    if (structure) {
+                        this.deposit = structure;
+                        this.depositId = structure.id;
+                    } else {
+                        var tower = this.creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
+                            filter: (structure:StructureTower) => structure.structureType === STRUCTURE_TOWER && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 50
+                        }) as StructureTower;
+                        if (tower) {
+                            this.deposit = tower;
+                            this.depositId = tower.id;
+                        }
                     }
                 }
             }
@@ -172,6 +189,7 @@ export class RMiner extends Role {
         mem.targetRoom = this.targetRoom;
         mem.parentRoomName = this.parentRoomName;
         mem.storageId = this.storageId;
+        mem.linkId = this.linkId;
         return mem;
     }
 }
