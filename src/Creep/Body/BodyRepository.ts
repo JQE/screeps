@@ -31,9 +31,9 @@ export class BodyRepository {
         return new Body(
             BODY_REMOTE_CLAIMER,
             750,
-            [TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,MOVE,MOVE,CLAIM],
-            [TOUGH,TOUGH,MOVE,CLAIM],
-            false
+            [TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,MOVE,MOVE,MOVE,MOVE,CLAIM],
+            [TOUGH,TOUGH,MOVE,MOVE,CLAIM],
+            true
         );
     }
 
