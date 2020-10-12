@@ -10,6 +10,8 @@ export class RemoteRepository {
                 return this.RMiner(targetRoom, parentRoomName);
             case ROLE_REMOTE_DEFENDER:
                 return this.RDefender(targetRoom, parentRoomName);
+            case ROLE_REMOTE_CLAIMER:
+                return this.RClaimer(targetRoom, parentRoomName);
             default:
                 return null;
         }

@@ -31,7 +31,7 @@ export class RClaimer extends Role {
         }
         for (let key in Game.flags) {
             let flag = Game.flags[key];
-            if (flag.room && flag.name === "muster "+this.targetRoom) {
+            if (flag.name === "muster "+this.targetRoom) {
                  this.flag = flag;
                  break;
             }
@@ -53,16 +53,14 @@ export class RClaimer extends Role {
                     this.arrived = false;
                 }
             } else {
-                if (this.inRoom) {
-                    if (!this.findTarget()) {
-                        if (this.flag && this.creep.pos.isNearTo(this.flag.pos)) {
-                            this.arrived = true;
-                        } else {
-                            this.arrived = false;
-                        }
-                    }
+                if (this.flag && this.creep.pos.isNearTo(this.flag.pos)) {
+                    this.arrived = true;
                 } else {
                     this.arrived = false;
+                }
+                if (this.arrived && this.flag && this.flag.room && this.creep.room.name == this.flag.room.name && this.creep.room.controller) {
+                    this.controller = this.creep.room.controller;
+                    this.controllerId = this.controller.id;
                 }
             }
         }
@@ -71,11 +69,12 @@ export class RClaimer extends Role {
     protected onExecute(): void {
         if (this.creep) {
             if (this.controller) {
-                if (this.creep.claimController(this.controller) === ERR_NOT_IN_RANGE) {
+                var result = this.creep.reserveController(this.controller);
+                if (result == ERR_NOT_IN_RANGE) {
                     this.creep.travelTo(this.controller);
                 }
             } else {
-                if (!this.arrived && this.flag) {
+                if (this.flag) {
                     this.creep.travelTo(this.flag);
                 }
             }

@@ -30,8 +30,8 @@ export class BodyRepository {
     public static RemoteClaimer(): Body {
         return new Body(
             BODY_REMOTE_CLAIMER,
-            700,
-            [TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,MOVE,CLAIM],
+            750,
+            [TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,MOVE,MOVE,CLAIM],
             [TOUGH,TOUGH,MOVE,CLAIM],
             false
         );
@@ -40,8 +40,8 @@ export class BodyRepository {
     public static RemoteDefender(): Body {
         return new Body(
             BODY_REMOTE_DEFENDER,
-            700,
-            [TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,RANGED_ATTACK,MOVE,RANGED_ATTACK,MOVE,ATTACK,MOVE, MOVE, MOVE],
+            750,
+            [TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,MOVE,RANGED_ATTACK,MOVE,RANGED_ATTACK,MOVE,ATTACK,MOVE, MOVE, MOVE],
             [RANGED_ATTACK, MOVE,ATTACK,MOVE, RANGED_ATTACK, MOVE,ATTACK,MOVE, RANGED_ATTACK, MOVE,ATTACK,MOVE],
             false
         );
@@ -50,8 +50,8 @@ export class BodyRepository {
     public static Defender(): Body {
         return new Body(
             BODY_DEFENDER,
-            700,
-            [TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,RANGED_ATTACK,MOVE,RANGED_ATTACK,MOVE,ATTACK,MOVE, MOVE, MOVE],
+            750,
+            [TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,MOVE,RANGED_ATTACK,MOVE,RANGED_ATTACK,MOVE,ATTACK,MOVE, MOVE, MOVE],
             [RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE],
             false
         );
@@ -70,8 +70,8 @@ export class BodyRepository {
     public static RemoteMiner(): Body {
         return new Body(
             BODY_REMOTE_MINER,
-            700,
-            [WORK,MOVE,MOVE,MOVE,CARRY,CARRY,WORK,MOVE,MOVE,MOVE,CARRY,CARRY],
+            750,
+            [WORK,MOVE,MOVE,MOVE,MOVE,CARRY,CARRY,WORK,MOVE,MOVE,MOVE,CARRY,CARRY],
             [],
             false
         );
@@ -80,8 +80,8 @@ export class BodyRepository {
     public static Hauler(): Body {
         return new Body(
             BODY_HAULER,
-            300,
-            [CARRY,MOVE,CARRY,MOVE],
+            350,
+            [MOVE,CARRY,MOVE,CARRY,MOVE],
             [CARRY,MOVE],
             false
         );
@@ -109,8 +109,8 @@ export class BodyRepository {
     public static HeavyWorker(): Body {
         return new Body(
             BODY_LIGHT_WORKER,
-            750,
-            [WORK,CARRY,MOVE,MOVE,WORK,CARRY,MOVE,MOVE,WORK,CARRY,MOVE,MOVE],
+            800,
+            [WORK,CARRY,MOVE,MOVE,MOVE,WORK,CARRY,MOVE,MOVE,WORK,CARRY,MOVE,MOVE],
             [MOVE,CARRY,MOVE,WORK,MOVE,CARRY,MOVE,WORK,MOVE,CARRY,MOVE,WORK],
             false
         );
