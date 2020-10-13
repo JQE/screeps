@@ -20,8 +20,8 @@ export class Colony {
             let towerMemory = memory.towers[key];
             colony.towers.push(Tower.fromMemory(towerMemory));
         }
-        for (let key in memory.linkSets) {
-            colony.linkSets.push(LinkSet.fromMemory(memory.linkSets[key] as LinkSetMemory));
+        if (memory.linkSets) {
+            colony.linkSets = LinkSet.fromMemory(memory.linkSets);
         }
         for (let key in memory.remotes) {
             let remote = memory.remotes[key];
@@ -91,7 +91,7 @@ export class Colony {
     private level: number = 1;
     private minerSpots: MinerSpot[];
     private towers: Tower[] = [];
-    private linkSets: LinkSet[] = [];
+    private linkSets?: LinkSet;
     private remotes: Remote[];
 
     public Load(): void {
@@ -104,12 +104,10 @@ export class Colony {
                 tower.Load();
             }
         }
-        for (let key in this.linkSets) {
-            let linkSet = this.linkSets[key];
-            if (linkSet) {
-                linkSet.Load();
-            }
+        if (this.linkSets) {
+            this.linkSets.Load();
         }
+
         if (this.room.controller && this.room.controller.level > this.level) {
             console.log("Setting room level to : "+this.room.controller.level);
             this.initRoles(this.room.controller.level);
@@ -180,7 +178,7 @@ export class Colony {
         }
         for (let key in this.roles) {
             let role = this.roles[key];
-            role.Load(staticMining);
+            role.Load(staticMining, this.linkSets?.dest?.id);
         }
     }
 
@@ -193,11 +191,8 @@ export class Colony {
             }
         }
 
-        for (let key in this.linkSets) {
-            let linkSet = this.linkSets[key];
-            if (linkSet) {
-                linkSet.Update();
-            }
+        if (this.linkSets) {
+            this.linkSets.Update();
         }
 
         for (let key in this.remotes) {
@@ -247,11 +242,8 @@ export class Colony {
             spawner.Execute();
         }
 
-        for (let key in this.linkSets) {
-            let linkSet = this.linkSets[key];
-            if (linkSet) {
-                linkSet.Execute();
-            }
+        if (this.linkSets) {
+            this.linkSets.Execute();
         }
 
         for (let key in this.remotes) {
@@ -287,11 +279,8 @@ export class Colony {
             spawner.Cleanup();
         }
 
-        for (let key in this.linkSets) {
-            let linkSet = this.linkSets[key];
-            if (linkSet) {
-                linkSet.Cleanup();
-            }
+        if (this.linkSets) {
+            this.linkSets.Cleanup();
         }
 
         for (let key in this.towers) {
@@ -336,6 +325,9 @@ export class Colony {
             case 4:
                 this.initLevel4();
                 break;
+            case 5:
+                this.initLevel5();
+                break;
             default:
                 return;
         }
@@ -370,6 +362,16 @@ export class Colony {
             this.roleLimits[ROLE_SCOUT]++;
             this.population.addScout();
         }
+    }
+
+    private initLevel5(): void {
+        this.roleLimits[ROLE_HARVESTER] = 3;
+        this.roleLimits[ROLE_UPGRADER] = 1;
+        this.roleLimits[ROLE_BUILDER] = 1;
+        this.roleLimits[ROLE_MECHANIC] = 0;
+        this.roleLimits[ROLE_HAULER] = 2;
+        this.roleLimits[ROLE_MINER] = 2;
+        this.roleLimits[ROLE_DEFENDER] = 1;
     }
 
     private initLevel4(): void {
@@ -444,8 +446,11 @@ export class Colony {
 
     private addLinkSet(): void {
         if (this.room.storage) {
-            if (this.linkSets.length < 1) {
-                let links = this.room.find(FIND_STRUCTURES, {
+            let links = this.room.find(FIND_MY_STRUCTURES, {
+                filter: (structure: StructureLink) => structure.structureType === STRUCTURE_LINK
+            });
+            if (!this.linkSets) {
+                let links = this.room.find(FIND_MY_STRUCTURES, {
                     filter: (structure: StructureLink) => structure.structureType === STRUCTURE_LINK
                 });
                 if (links && links.length >= 2) {
@@ -464,9 +469,21 @@ export class Colony {
                             sourceId.push(link.id as Id<StructureLink>);
                         }
                     }
+
                     if (targetId && sourceId) {
                         let linkSet = new LinkSet(sourceId, targetId);
-                        this.linkSets.push(linkSet);
+                        this.linkSets = linkSet;
+                    }
+                }
+            } else if (this.linkSets && this.linkSets.source) {
+                if (links.length > this.linkSets.source.length) {
+                    for (let key in links) {
+                        let link = links[key];
+                        if (link) {
+                            if (this.linkSets.checkSource(link as StructureLink)) {
+                                this.linkSets.addSource(link as StructureLink);
+                            }
+                        }
                     }
                 }
             }
@@ -513,7 +530,7 @@ export class Colony {
             level: this.level,
             towers: this.towers.map((p) => p.Save()),
             remotes: this.getRemoteMemory(),
-            linkSets: this.linkSets.map((p) => p.Save())
+            linkSets: this.linkSets?.Save()
         }
     }
 }

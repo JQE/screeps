@@ -101,6 +101,9 @@ export class Population {
                 case 4:
                     this.initLevel4();
                     break;
+                case 5:
+                    this.initLevel5();
+                    break;
                 default:
                     return;
             }
@@ -108,9 +111,16 @@ export class Population {
         this.level = level;
     }
 
+    private initLevel5(): void {
+        this.limits[BODY_LIGHT_WORKER] = 5;
+        this.limits[BODY_HAULER] = 2;
+        this.limits[BODY_MINER] = 2;
+        this.limits[BODY_DEFENDER] = 1;
+    }
+
     private initLevel4(): void {
-        this.limits[BODY_LIGHT_WORKER] = 6;
-        this.limits[BODY_HAULER] = 4;
+        this.limits[BODY_LIGHT_WORKER] = 5;
+        this.limits[BODY_HAULER] = 2;
         this.limits[BODY_MINER] = 2;
         this.limits[BODY_DEFENDER] = 1;
     }
@@ -138,10 +148,12 @@ export class Population {
 
     public coreDecrease(): void {
         this.limits[BODY_REMOTE_DEFENDER] -= 2;
+        this.limits[BODY_REMOTE_MINER] += 2;
     }
 
     public coreIncrease(): void {
         this.limits[BODY_REMOTE_DEFENDER] += 2;
+        this.limits[BODY_REMOTE_MINER] -= 2;
     }
 
     public addRemote(): void {

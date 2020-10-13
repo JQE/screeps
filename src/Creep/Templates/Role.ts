@@ -5,6 +5,7 @@ export abstract class Role {
     protected creepId?: Id<Creep>;
     protected creep?:Creep | null;
     protected staticMining: boolean = false;
+    protected destLinkId?: Id<StructureLink>;
     public working: boolean = false;
     public type: RoleType;
     public body: BodyType;
@@ -23,7 +24,7 @@ export abstract class Role {
     protected abstract onExecute(): void;
     protected abstract onCleanup(): void;
 
-    public Load(staticMining: boolean): void {
+    public Load(staticMining: boolean, destLinkId?: Id<StructureLink>): void {
         this.staticMining = staticMining;
         if (this.creepId) {
             this.creep = Game.getObjectById(this.creepId);
@@ -32,6 +33,9 @@ export abstract class Role {
             }
         } else {
             delete this.creep;
+        }
+        if (destLinkId) {
+            this.destLinkId = destLinkId;
         }
         this.onLoad();
     }

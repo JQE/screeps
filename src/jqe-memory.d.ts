@@ -42,6 +42,7 @@ export interface DefenderMemory extends RoleMemory {
 export interface HaulerMemory extends RoleMemory {
     containerId?: Id<StructureContainer>;
     storageId?: Id<StructureStorage>;
+    linkId?: Id<StructureLink>;
     depositId?: DepositTargetIds;
 }
 
@@ -136,7 +137,7 @@ export interface ColonyMemory {
     roles: RoleMemory[];
     level: number;
     towers: TowerMemory[];
-    linkSets: LinkSetMemory[];
+    linkSets?: LinkSetMemory;
     remotes: { [ remoteName: string]: RemoteMemory};
 }
 

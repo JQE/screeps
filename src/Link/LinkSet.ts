@@ -14,8 +14,8 @@ export class LinkSet {
     private sourceId: Id<StructureLink>[] = [];
     private destId: Id<StructureLink>;
 
-    private source?: StructureLink[] = [];
-    private dest?: StructureLink | null;
+    public source?: StructureLink[] = [];
+    public dest?: StructureLink | null;
 
     private shouldTransfer:boolean = false;
 
@@ -49,6 +49,22 @@ export class LinkSet {
     }
 
     public Cleanup(): void {
+    }
+
+    public checkSource(link: StructureLink) : boolean {
+        let available = true;
+        for (let key in this.sourceId) {
+            let check = this.sourceId[key];
+            if (check === link.id) {
+                available = false;
+                break;
+            }
+        }
+        return available;
+    }
+
+    public addSource(link: StructureLink) : void {
+        this.sourceId.push(link.id);
     }
 
     public Save(): LinkSetMemory {

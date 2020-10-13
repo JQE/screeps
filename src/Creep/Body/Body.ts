@@ -55,6 +55,8 @@ export class Body {
                 if (remainingEnergy >= BODYPART_COST[part]) {
                     remainingEnergy -= BODYPART_COST[part];
                     parts.push(part);
+                } else {
+                    break;
                 }
             }
             return parts;

@@ -21,6 +21,7 @@ export class Hauler extends Role {
 
     private container?: StructureContainer | null;
     private storage?: StructureStorage | null;
+    private link?: StructureLink | null;
     private deposit?: DepositTargets | null;
 
     protected onLoad(): void {
@@ -42,6 +43,12 @@ export class Hauler extends Role {
                 delete this.depositId;
             }
         }
+        if(this.destLinkId) {
+            this.link = Game.getObjectById(this.destLinkId);
+            if (!this.link || this.link.store.getUsedCapacity(RESOURCE_ENERGY) < 50) {
+                delete this.destLinkId;
+            }
+        }
     };
 
     protected onUpdate(): void {
@@ -51,7 +58,7 @@ export class Hauler extends Role {
                     this.working = false;
                     delete this.containerId;
                 } else {
-                    if (!this.container) {
+                    if (!this.container && !this.link) {
                         this.findContainer();
                     }
                 }
@@ -70,7 +77,11 @@ export class Hauler extends Role {
     protected onExecute(): void {
         if (this.creep) {
             if (this.working) {
-                if (this.container) {
+                if (this.link && this.link.store.getUsedCapacity(RESOURCE_ENERGY) >= 50) {
+                    if (this.creep.withdraw(this.link, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+                        this.creep.travelTo(this.link);
+                    }
+                } else if (this.container) {
                     if (this.creep.withdraw(this.container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                         this.creep.travelTo(this.container);
                     }

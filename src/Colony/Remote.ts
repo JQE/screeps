@@ -55,7 +55,10 @@ export class Remote {
             } else if (count > this.remoteLimits[key]) {
                 for (var index = this.remoteLimits[key]; index < count; index++) {
                     var role = this.roles[index];
-                    role.canRetire();
+                    if (role.finished === false) {
+                        console.log("Retiring: "+role.type);
+                        role.canRetire();
+                    }
                 }
             }
         }
@@ -65,12 +68,14 @@ export class Remote {
         }
         let room = Game.rooms[this.roomName];
         if (room) {
-            let core = room.find(FIND_HOSTILE_STRUCTURES, { filter: (core) => core.structureType == STRUCTURE_INVADER_CORE});
-            if (core && this.remoteLimits[ROLE_REMOTE_DEFENDER] !== 3) {
+            let core = room.find(FIND_HOSTILE_STRUCTURES, { filter: (core) => core.structureType === STRUCTURE_INVADER_CORE && core.room.name === this.roomName});
+            if (core.length > 0 && this.remoteLimits[ROLE_REMOTE_DEFENDER] !== 3) {
                 this.remoteLimits[ROLE_REMOTE_DEFENDER] = 3;
+                this.remoteLimits[ROLE_REMOTE_MINER] = 0;
                 this.colony.population.coreIncrease();
-            } else if (this.remoteLimits[ROLE_REMOTE_DEFENDER] !== 1) {
+            } else if (core.length === 0 && this.remoteLimits[ROLE_REMOTE_DEFENDER] !== 1) {
                 this.remoteLimits[ROLE_REMOTE_DEFENDER] = 1;
+                this.remoteLimits[ROLE_REMOTE_MINER] = 2;
                 this.colony.population.coreDecrease();
             }
         }

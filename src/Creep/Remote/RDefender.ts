@@ -76,22 +76,12 @@ export class RDefender extends Role {
     public onExecute(): void {
         if (this.creep) {
             if (this.core) {
-                var range = this.creep.pos.getRangeTo(this.core);
-                if (range > 3) {
+                if (this.creep.attack(this.core) === ERR_NOT_IN_RANGE) {
                     this.creep.travelTo(this.core);
-                } else if (range > 1 && range <= 3) {
-                    this.creep.rangedAttack(this.core);
-                } else {
-                    this.creep.attack(this.core);
                 }
             } else if (this.target) {
-                var range = this.creep.pos.getRangeTo(this.target);
-                if (range > 3) {
+                if (this.creep.attack(this.target) === ERR_NOT_IN_RANGE) {
                     this.creep.travelTo(this.target);
-                } else if (range > 1 && range <= 3) {
-                    this.creep.rangedAttack(this.target);
-                } else if (range === 1) {
-                    this.creep.attack(this.target);
                 }
             } else {
                 if (!this.arrived && this.flag) {
