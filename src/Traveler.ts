@@ -2,6 +2,7 @@
  * To start using Traveler, require it in main.js:
  * Example: var Traveler = require('Traveler.js');
  */
+import * as _ from 'lodash';
 
 export class Traveler {
 

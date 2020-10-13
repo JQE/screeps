@@ -8,6 +8,7 @@ import { Spawner } from "Spawn/Spawner";
 import { Tower } from "Tower/Tower";
 import { Population } from "./Population";
 import { Remote } from "./Remote";
+import * as _ from 'lodash';
 
 export class Colony {
     public static fromMemory(memory: ColonyMemory): Colony {
@@ -123,7 +124,7 @@ export class Colony {
         }
         let downList = [];
         for (let key in this.roleLimits) {
-            let count = _.sum(this.roles, (role) => role.type === key ? 1: 0);
+            let count = _.sumBy(this.roles, (role) => role.type === key ? 1: 0);
             if (key === ROLE_MINER && count === 0) {
                 for (let index = 0; index < this.minerSpots.length; index++) {
                     let spot = this.minerSpots[index];

@@ -6,6 +6,7 @@ import { Colony } from "./Colony";
 import { RMiner } from "Creep/Remote/rminer";
 import { RDefender } from "Creep/Remote/RDefender";
 import { RClaimer } from "Creep/Remote/RClaimer";
+import * as _ from 'lodash';
 
 export class Remote {
     public static fromMemory(memory: RemoteMemory, colony: Colony): Remote {
@@ -46,7 +47,7 @@ export class Remote {
 
     public Load(): void {
         for (var key in this.remoteLimits) {
-            var count = _.sum(this.roles, (role) => role.type === key ? 1: 0);
+            var count = _.sumBy(this.roles, (role) => role.type === key ? 1: 0);
             if (count < this.remoteLimits[key]) {
                 let newRole = RemoteRepository.getRole(key as RemoteRoleType, this.roomName, this.parentName);
                 if (newRole) {

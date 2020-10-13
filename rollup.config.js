@@ -25,7 +25,28 @@ export default {
   plugins: [
     clear({ targets: ["dist"] }),
     resolve(),
-    commonjs(),
+    commonjs({
+      namedExports: {
+          'node_modules/lodash/lodash.js': [
+              'unionBy',
+              'union',
+              'reduce',
+              'find',
+              'forEach',
+              'includes',
+              'endsWith',
+              'sum',
+              'sumBy',
+              'map',
+              'sortedIndexBy',
+              'escape',
+              'filter',
+              'isArray',
+              'round',
+              'defaults'
+          ]
+      }
+  }),
     typescript({tsconfig: "./tsconfig.json"}),
     screeps({config: cfg, dryRun: cfg == null})
   ]

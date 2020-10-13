@@ -1,6 +1,7 @@
 import { BodyRepository } from "Creep/Body/BodyRepository";
 import { PopulationMemory } from "jqe-memory";
 import { SpawnRequest } from "Spawn/SpawnRequest";
+import * as _ from 'lodash';
 
 export class Population {
     public static fromMemory(memory: PopulationMemory): Population {
@@ -40,8 +41,8 @@ export class Population {
 
     public Load(): void {
         for (var key in this.limits) {
-            this.creeps[key] = _.sum(Game.creeps, (creep) => (creep.memory.body === key && creep.memory.colony === this.colonyName) ? 1: 0);
-            var needMore = _.sum(this.spawnQueue, (q) => q.body.type === key ? 1 : 0);
+            this.creeps[key] = _.sumBy(_.map(Game.creeps), (creep:Creep) => (creep.memory.body === key && creep.memory.colony === this.colonyName) ? 1: 0);
+            var needMore = _.sumBy(this.spawnQueue, (q) => q.body.type === key ? 1 : 0);
             if (this.creeps[key]) {
                 needMore += this.creeps[key];
             }
@@ -51,7 +52,7 @@ export class Population {
                 if (body) {
                     var spawnRequest = new SpawnRequest(key + " " + Game.time, 0, body, Game.time+1, this.colonyName);
                     if (key === "miner") { spawnRequest.priority = 10;}
-                    var index = _.sortedIndex(this.spawnQueue, spawnRequest, (p) => p.priority * -10000 - p.age);
+                    var index = _.sortedIndexBy(this.spawnQueue, spawnRequest, (p) => p.priority * -10000 - p.age);
                     this.spawnQueue.splice(index, 0, spawnRequest);
                 }
             }
