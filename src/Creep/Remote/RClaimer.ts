@@ -69,16 +69,19 @@ export class RClaimer extends Role {
     protected onExecute(): void {
         if (this.creep) {
             if (this.controller) {
-                var result = this.creep.claimController(this.controller);
-                if (result === ERR_GCL_NOT_ENOUGH) {
+                let room = Game.rooms[this.targetRoom];
+                let result = null;
+                if (room && room.memory.upgrade === true) {
+                    result = this.creep.claimController(this.controller);
+                }
+                if (result === null || result === ERR_GCL_NOT_ENOUGH) {
                     result = this.creep.reserveController(this.controller);
+                    if (result == ERR_NOT_IN_RANGE) {
+                        this.creep.travelTo(this.controller);
+                    } else if (result === ERR_INVALID_TARGET) {
+                        this.creep.attackController(this.controller);
+                    }
                 }
-                if (result == ERR_NOT_IN_RANGE) {
-                    this.creep.travelTo(this.controller);
-                } else if (result === ERR_INVALID_TARGET) {
-                    this.creep.attackController(this.controller);
-                }
-                    
             } else {
                 if (this.flag) {
                     this.creep.travelTo(this.flag);

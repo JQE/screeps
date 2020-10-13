@@ -103,10 +103,14 @@ export class Hauler extends Role {
 
     private findContainer(): void {
         if (this.creep) {
-            let container = this.creep.pos.findClosestByPath(FIND_STRUCTURES, {
+            let containers = this.creep.room.find(FIND_STRUCTURES, {
                 filter: (structure:StructureContainer) => structure.structureType === STRUCTURE_CONTAINER &&
                                                         structure.store.getUsedCapacity(RESOURCE_ENERGY) > 50
-            }) as StructureContainer;
+            }) as StructureContainer[];
+            containers.sort((a,b) => {
+                return b.store.getUsedCapacity(RESOURCE_ENERGY) - a.store.getUsedCapacity(RESOURCE_ENERGY);
+            });
+            let container = containers[0];
             if (container) {
                 this.container = container;
                 this.containerId = container.id;

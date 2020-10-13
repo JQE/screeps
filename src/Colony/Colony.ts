@@ -511,6 +511,31 @@ export class Colony {
         }
     }
 
+    public removeRemote(roomName: string): void {
+        let index = -1;
+        for (let i = 0; i < this.remotes.length; i++) {
+            if (this.remotes[i].roomName === roomName) {
+                index = i;
+                break;
+            }
+        }
+        if (index > 0) {
+            this.remotes.splice(index, 1);
+        }
+    }
+
+    public getColonyByRemote(roomName: string): Colony | null {
+        for (let key in this.remotes) {
+            let remote = this.remotes[key];
+            if (remote) {
+                if (remote.roomName === roomName) {
+                    return this;
+                }
+            }
+        }
+        return null;
+    }
+
     private getRemoteMemory(): { [name: string]: RemoteMemory } {
         let remotes: { [name:string]: RemoteMemory } = {};
         for (let i = 0; i < this.remotes.length; i++) {

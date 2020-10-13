@@ -39,7 +39,7 @@ export class Remote {
 
     private colony: Colony;
     private parentName: string;
-    private roomName: string;
+    public roomName: string;
     public name: string;
     private remoteLimits: { [roleType: string]: number } = {};
     public roles: Role[] = [];

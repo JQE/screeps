@@ -18,6 +18,7 @@ export class Empire {
 
     public Load(): void {
         this.addColonies();
+        this.upgradeRemote();
         for(var key in this.colonies) {
             let colony = this.colonies[key];
             colony.Load();
@@ -59,21 +60,39 @@ export class Empire {
         }
     }
 
+    public upgradeRemote(): void {
+        let flag = this.findUpgradeFlags();
+        if (flag && flag.room !== undefined) {
+            let remoteFlag = this.findRemoteFlag(flag.room.name);
+            let name = "Colony " + flag.room.name;
+            if (this.colonyExists(global.empire, name)) {
+                return;
+            }
+            var oldColony = this.getColonyByRemote(flag.room.name);
+            if (oldColony) {
+                oldColony.removeRemote(flag.room.name);
+            }
+            let colony = this.addColonyFromFlag(flag, name);
+            if (colony) {
+                colony.initRoles(1);
+                this.colonies.push(colony);
+                flag.remove();
+            }
+        }
+    }
+
     public addColonies(): void {
-        let flags = this.findFlags();
-        for (var i = 0; i < flags.length; i++) {
-            var flag = flags[i];
-            if (flag.room !== undefined) {
-                let name = "Colony " + flag.room.name;
-                if (this.colonyExists(global.empire, name)) {
-                    return;
-                }
-                let colony = this.addColonyFromFlag(flag, name);
-                if (colony) {
-                    colony.initRoles(1);
-                    this.colonies.push(colony);
-                    flag.remove();
-                }
+        let flag = this.findFlags();
+        if (flag && flag.room !== undefined) {
+            let name = "Colony " + flag.room.name;
+            if (this.colonyExists(global.empire, name)) {
+                return;
+            }
+            let colony = this.addColonyFromFlag(flag, name);
+            if (colony) {
+                colony.initRoles(1);
+                this.colonies.push(colony);
+                flag.remove();
             }
         }
     }
@@ -90,6 +109,25 @@ export class Empire {
         return empire.getColonyByName(colonyName) ? true : false;
     }
 
+    public getColonyByRemote(roomName: string): Colony | null {
+        for (var i = 0; i < this.colonies.length; i++) {
+            let colony = this.colonies[i].getColonyByRemote(roomName);
+            if (colony) {
+                return colony;
+            }
+        }
+        return null;
+    }
+
+    public getColonyByRoom(roomName: string): Colony | null {
+        for (var i = 0; i < this.colonies.length; i++) {
+            if (this.colonies[i].roomName == roomName) {
+                return this.colonies[i];
+            }
+        }
+        return null;
+    }
+
     public getColonyByName(colonyName: string): Colony | null {
         for (var i = 0; i < this.colonies.length; i++) {
             if (this.colonies[i].name == colonyName) {
@@ -99,13 +137,30 @@ export class Empire {
         return null;
     }
 
-    public findFlags(): Flag[] {
-        let flags = [];
+    public findRemoteFlag(roomName: string): Flag | null {
         for (let key in Game.flags) {
-            if (Game.flags[key].name === "newColony") {
-                flags.push(Game.flags[key]);
+            let flag = Game.flags[key];
+            if (flag && flag.room && flag.room.name == roomName && flag.name.startsWith("muster")) {
+                return flag;
             }
         }
-        return flags;
+        return null;
+    }
+
+    public findUpgradeFlags(): Flag | null{
+        for (let key in Game.flags) {
+            if (Game.flags[key].name === "upgrade") {
+                return Game.flags[key];
+            }
+        }
+        return null;
+    }
+    public findFlags(): Flag | null {
+        for (let key in Game.flags) {
+            if (Game.flags[key].name === "newColony") {
+                return Game.flags[key];
+            }
+        }
+        return null;
     }
 }

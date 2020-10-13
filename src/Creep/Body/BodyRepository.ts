@@ -81,7 +81,7 @@ export class BodyRepository {
         return new Body(
             BODY_HAULER,
             200,
-            [MOVE,CARRY,MOVE,CARRY],
+            [MOVE,CARRY,MOVE,CARRY,MOVE,CARRY],
             [],
             false
         );

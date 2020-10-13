@@ -13,6 +13,7 @@ interface CreepMemory {
 interface RoomMemory {
   colonyName: string;
   avoid?: number;
+  upgrade: boolean;
 }
 
 interface LinkMemory {
