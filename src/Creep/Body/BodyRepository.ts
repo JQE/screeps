@@ -72,7 +72,7 @@ export class BodyRepository {
             BODY_REMOTE_MINER,
             700,
             [WORK,MOVE,MOVE,MOVE,MOVE,CARRY,CARRY,WORK,MOVE,MOVE,CARRY,CARRY],
-            [],
+            [MOVE,WORK,MOVE,CARRY,MOVE,CARRY],
             false
         );
     }

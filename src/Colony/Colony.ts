@@ -304,11 +304,17 @@ export class Colony {
         if (this.room.controller) {
             let visual = new RoomVisual(this.roomName);
             let percent = Math.round((this.room.controller.progress / this.room.controller.progressTotal)*100);
+            let progress = percent / 10;
             let text = "Controller Level "+this.room.controller.level+" Upgrading: "+percent+"%";
             let gclp = Math.round((Game.gcl.progress/Game.gcl.progressTotal) * 100);
+            let gpro = gclp/ 10;
             let gclText = "GCL Level "+Game.gcl.level+" Upgrading: "+gclp+"%";
-            visual.text(text, 2, 2, { align: "left", opacity: 0.8});
-            visual.text(gclText, 2,3, { align: "left", opacity: 0.8});
+            visual.text(text, 2, 2, { align: "left", opacity: 0.8})
+                .rect(2,3,10,1, {fill: 'transparent', stroke: '#ffffff'})
+                .rect(2,3,progress,1, {fill: '#008000'})
+                .text(gclText, 2,5, { align: "left", opacity: 0.8})
+                .rect(2,6,10,1, {fill: 'transparent', stroke: '#ffffff'})
+                .rect(2,6,gpro,1, {fill: '#008000'});
         }
     }
 
@@ -368,7 +374,7 @@ export class Colony {
     private initLevel5(): void {
         this.roleLimits[ROLE_HARVESTER] = 3;
         this.roleLimits[ROLE_UPGRADER] = 1;
-        this.roleLimits[ROLE_BUILDER] = 1;
+        this.roleLimits[ROLE_BUILDER] = 3;
         this.roleLimits[ROLE_MECHANIC] = 0;
         this.roleLimits[ROLE_HAULER] = 2;
         this.roleLimits[ROLE_MINER] = 2;

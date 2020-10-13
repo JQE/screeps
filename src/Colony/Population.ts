@@ -113,7 +113,7 @@ export class Population {
     }
 
     private initLevel5(): void {
-        this.limits[BODY_LIGHT_WORKER] = 5;
+        this.limits[BODY_LIGHT_WORKER] = 7;
         this.limits[BODY_HAULER] = 2;
         this.limits[BODY_MINER] = 2;
         this.limits[BODY_DEFENDER] = 1;
