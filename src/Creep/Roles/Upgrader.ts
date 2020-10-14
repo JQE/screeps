@@ -122,7 +122,9 @@ export class Upgrader extends Role {
                     }
                 } else if (this.source) {
                     if (this.creep.harvest(this.source) === ERR_NOT_IN_RANGE) {
-                        this.creep.travelTo(this.source);
+                        if (this.creep.travelTo(this.source) === ERR_NO_PATH) {
+                            delete this.sourceId;
+                        }
                     }
                 }
             } else {

@@ -127,14 +127,14 @@ export class Population {
     }
 
     private initLevel3(): void {
-        this.limits[BODY_LIGHT_WORKER] = 9;
+        this.limits[BODY_LIGHT_WORKER] = 8;
         this.limits[BODY_HAULER] = 0;
         this.limits[BODY_MINER] = 2;
         this.limits[BODY_DEFENDER] = 0;
     }
 
     private initLevel2(): void {
-        this.limits[BODY_LIGHT_WORKER] = 7;
+        this.limits[BODY_LIGHT_WORKER] = 6;
         this.limits[BODY_HAULER] = 0;
         this.limits[BODY_MINER] = 2;
         this.limits[BODY_DEFENDER] = 0;

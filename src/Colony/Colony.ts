@@ -177,6 +177,12 @@ export class Colony {
                 staticMining = true;
             }
         }
+        if (staticMining) {
+            let containers = this.room.find(FIND_STRUCTURES,{ filter: (con) => con.structureType === STRUCTURE_CONTAINER});
+            if (!containers || containers.length < 2) {
+                staticMining = false;
+            }
+        }
         for (let key in this.roles) {
             let role = this.roles[key];
             role.Load(staticMining, this.linkSets?.dest?.id);
