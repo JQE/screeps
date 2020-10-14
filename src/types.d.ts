@@ -20,10 +20,17 @@ interface LinkMemory {
   source: boolean;
 }
 
+interface RepairItem {
+  structureId: Id<AnyStructure>;
+  assigned: number;
+  hits: number;
+}
+
 interface Memory {
   uuid: number;
   log: any;
   empire: any;
+  repair: RepairItem[];
 }
 
 interface PathfinderReturn {

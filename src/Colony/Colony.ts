@@ -96,6 +96,7 @@ export class Colony {
     private remotes: Remote[];
 
     public Load(): void {
+        this.findRepairStructures();
         this.checkRemote();
         this.addTowers();
         this.addLinkSet();
@@ -555,6 +556,48 @@ export class Colony {
             remotes[this.remotes[i].name] = this.remotes[i].Save();
         }
         return remotes;
+    }
+
+    public findRepairStructures(): void {
+        let repairs = this.room.find(FIND_STRUCTURES, {
+            filter: (structure) => structure.hits < structure.hitsMax
+        });
+        repairs.sort((a,b) => {
+            if (a.hits < b.hits) return -1;
+            if (a.hits > b.hits) return 1;
+            return 0;
+        });
+        for (let key in repairs) {
+            let repair = repairs[key];
+            if (repair) {
+                let found = false;
+                for (let index in Memory.repair) {
+                    if (Memory.repair[index].structureId === repair.id) {
+                        found = true;
+                        Memory.repair[index].hits = repair.hits;
+                        break;
+                    }
+                }
+                if (!found) {
+                    Memory.repair.push({ structureId: repair.id, assigned: 0, hits: repair.hits});
+                }
+            }
+        }
+        let downList = [];
+        for (let key in Memory.repair) {
+            let repair = Memory.repair[key];
+            if (repair) {
+                let test = Game.getObjectById(repair.structureId);
+                if (!test || test.hits === test.hitsMax) {
+                    downList.push(repair);
+                }
+            }
+        }
+        for (let key in downList) {
+            let repair = downList[key];
+            let index = Memory.repair.indexOf(repair);
+            Memory.repair.splice(index, 1);
+        }
     }
 
     public Save(): ColonyMemory {

@@ -147,9 +147,16 @@ export class Upgrader extends Role {
                 this.tombstoneId = tombstone.id;
                 this.tombstone = tombstone;
             } else {
-                var resource = this.creep.pos.findClosestByPath(FIND_DROPPED_RESOURCES, {
+                let resources = this.creep.pos.findInRange(FIND_DROPPED_RESOURCES, 40, {
                     filter: (resource) => resource.resourceType === RESOURCE_ENERGY && resource.amount > 50
                 });
+                let resource = null;
+                if (resources.length > 0) {
+                    resources.sort((a, b) => {
+                        return b.amount - a.amount;
+                    });
+                    resource = resources[0];
+                }
                 if (resource) {
                     this.resourceId = resource.id;
                     this.resource = resource;

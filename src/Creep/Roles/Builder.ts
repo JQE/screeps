@@ -1,9 +1,10 @@
+import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from "constants";
 import { Role } from "Creep/Templates/Role";
 import { BuilderMemory } from "jqe-memory";
 
 export class Builder extends Role {
     public static fromMemory(memory: BuilderMemory): Builder {
-        var builder = new this(memory.working, memory.finished, memory.creepId);
+        let builder = new this(memory.working, memory.finished, memory.creepId);
         builder.sourceId = memory.sourceId;
         builder.tombstoneId = memory.tombstonId;
         builder.resourceId = memory.resourceId;
@@ -71,6 +72,13 @@ export class Builder extends Role {
         if (this.structureId) {
             this.structure = Game.getObjectById(this.structureId);
             if (!this.structure || this.structure.hits == this.structure.hitsMax) {
+                for (let index in Memory.repair) {
+                    if (Memory.repair[index].structureId === this.structureId) {
+                        Memory.repair[index].assigned--;
+                        if (Memory.repair[index].assigned < 0) Memory.repair[index].assigned = 0;
+                        break;
+                    }
+                }
                 delete this.structureId;
             }
         }
@@ -107,6 +115,13 @@ export class Builder extends Role {
                 if (this.creep.store.getUsedCapacity(RESOURCE_ENERGY) <= 0) {
                     this.working = true;
                     delete this.siteId;
+                    for (let index in Memory.repair) {
+                        if (Memory.repair[index].structureId === this.structureId) {
+                            Memory.repair[index].assigned--;
+                            if (Memory.repair[index].assigned < 0) Memory.repair[index].assigned = 0;
+                            break;
+                        }
+                    }
                     delete this.structureId;
                     delete this.controllerId;
                 } else {
@@ -165,16 +180,23 @@ export class Builder extends Role {
 
     private findEnergy() {
         if (this.creep) {
-            var tombstone = this.creep.pos.findClosestByPath(FIND_TOMBSTONES, {
+            let tombstone = this.creep.pos.findClosestByPath(FIND_TOMBSTONES, {
                 filter: (stone) => stone.store.getUsedCapacity(RESOURCE_ENERGY) > 0
             });
             if (tombstone) {
                 this.tombstoneId = tombstone.id;
                 this.tombstone = tombstone;
             } else {
-                var resource = this.creep.pos.findClosestByPath(FIND_DROPPED_RESOURCES, {
+                let resources = this.creep.pos.findInRange(FIND_DROPPED_RESOURCES, 40, {
                     filter: (resource) => resource.resourceType === RESOURCE_ENERGY && resource.amount > 50
                 });
+                let resource = null;
+                if (resources.length > 0) {
+                    resources.sort((a, b) => {
+                        return b.amount - a.amount;
+                    });
+                    resource = resources[0];
+                }
                 if (resource) {
                     this.resourceId = resource.id;
                     this.resource = resource;
@@ -183,14 +205,14 @@ export class Builder extends Role {
                         this.storage = this.creep.room.storage;
                         this.storageId = this.creep.room.storage.id;
                     } else {
-                        var container = this.creep.pos.findClosestByPath(FIND_STRUCTURES, {
+                        let container = this.creep.pos.findClosestByPath(FIND_STRUCTURES, {
                             filter: (structure: StructureContainer) => structure.structureType === STRUCTURE_CONTAINER && structure.store.getUsedCapacity(RESOURCE_ENERGY) > 50
                         }) as StructureContainer;
                         if (container) {
                             this.container = container;
                             this.containerId = container.id;
                         } else if (!this.staticMining) {
-                            var source = this.creep.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
+                            let source = this.creep.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
                             if (source) {
                                 this.source = source;
                                 this.sourceId = source.id;
@@ -204,20 +226,40 @@ export class Builder extends Role {
 
     private findWork() {
         if (this.creep) {
-            var site = this.creep.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
+            let site = this.creep.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
             if (site) {
                 this.site = site;
                 this.siteId = site.id;
             } else {
-                var repair = this.creep.room.find(FIND_STRUCTURES, {
-                    filter: (structure) => structure.hits < structure.hitsMax
+                let repair = null;
+                Memory.repair.sort((a, b) => {
+                    if (a.assigned < b.assigned) return -1;
+                    if (a.assigned > b.assigned) return 1;
+                    if (a.hits < b.hits) return -1;
+                    if (a.hits > b.hits) return 1;
+                    return 0;
                 });
-                if (repair.length > 0) {
-                    repair.sort((a, b) => {
-                        return a.hits - b.hits;
+                for (let key in Memory.repair) {
+                    if (Memory.repair[key].assigned <= 0) {
+                        repair = Memory.repair[key];
+                        Memory.repair[key].assigned = 1;
+                        break;
+                    }
+                }
+                if (!repair && Memory.repair.length > 0) {
+                    Memory.repair.sort((a, b) => {
+                        if (a.assigned < b.assigned) return -1;
+                        if (a.assigned > b.assigned) return 1;
+                        if (a.hits < b.hits) return -1;
+                        if (a.hits > b.hits) return 1;
+                        return 0;
                     });
-                    this.structure = repair[0];
-                    this.structureId = repair[0].id;
+                    repair = Memory.repair[0];
+                    Memory.repair[0].assigned++;
+                }
+                if (repair) {
+                    this.structureId = repair.structureId;
+                    this.structure = Game.getObjectById(repair.structureId);
                 } else {
                     if(this.creep.room.controller) {
                         this.controllerId = this.creep.room.controller.id;
@@ -229,7 +271,7 @@ export class Builder extends Role {
     }
 
     public Save(): BuilderMemory {
-        var mem = super.Save() as BuilderMemory;
+        let mem = super.Save() as BuilderMemory;
         mem.sourceId = this.sourceId;
         mem.tombstonId = this.tombstoneId;
         mem.resourceId = this.resourceId;
