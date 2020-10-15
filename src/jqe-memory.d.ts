@@ -126,6 +126,7 @@ export interface RemoteMemory {
     name: string;
     remoteLimits: { [roleType: string]: number };
     roles: RoleMemory[];
+    minerCount: number;
 }
 
 export interface ColonyMemory {

@@ -148,14 +148,21 @@ export class Population {
         this.limits[BODY_DEFENDER] = 0;
     }
 
-    public coreDecrease(): void {
+    public coreDecrease(miners:number): void {
         this.limits[BODY_REMOTE_DEFENDER] -= 2;
         this.limits[BODY_REMOTE_MINER] += 2;
     }
 
-    public coreIncrease(): void {
+    public coreIncrease(miners:number): void {
         this.limits[BODY_REMOTE_DEFENDER] += 2;
         this.limits[BODY_REMOTE_MINER] -= 2;
+    }
+
+    public removeRemote(miners:number): void {
+        this.remoteCount--;
+        this.limits[BODY_REMOTE_MINER] = this.limits[BODY_REMOTE_MINER]-miners;
+        this.limits[BODY_REMOTE_DEFENDER] = this.remoteCount;
+        this.limits[BODY_REMOTE_CLAIMER] = this.remoteCount;
     }
 
     public addRemote(): void {

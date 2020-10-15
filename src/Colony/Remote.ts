@@ -13,6 +13,7 @@ export class Remote {
         let remote = new this(memory.name, memory.roomName, memory.parentName, colony);
         remote.remoteLimits = memory.remoteLimits;
         remote.roles =[];
+        remote.minerCount = memory.minerCount;
         for (var key in memory.roles) {
             let role = memory.roles[key];
             switch(role.type) {
@@ -44,6 +45,7 @@ export class Remote {
     public name: string;
     private remoteLimits: { [roleType: string]: number } = {};
     public roles: Role[] = [];
+    private minerCount: number = 0;
 
     public Load(): void {
         for (var key in this.remoteLimits) {
@@ -72,12 +74,13 @@ export class Remote {
             let core = room.find(FIND_HOSTILE_STRUCTURES, { filter: (core) => core.structureType === STRUCTURE_INVADER_CORE && core.room.name === this.roomName});
             if (core.length > 0 && this.remoteLimits[ROLE_REMOTE_DEFENDER] !== 3) {
                 this.remoteLimits[ROLE_REMOTE_DEFENDER] = 3;
+                this.minerCount = this.countMiners();
                 this.remoteLimits[ROLE_REMOTE_MINER] = 0;
-                this.colony.population.coreIncrease();
+                this.colony.population.coreIncrease(this.minerCount);
             } else if (core.length === 0 && this.remoteLimits[ROLE_REMOTE_DEFENDER] !== 1) {
                 this.remoteLimits[ROLE_REMOTE_DEFENDER] = 1;
                 this.remoteLimits[ROLE_REMOTE_MINER] = 2;
-                this.colony.population.coreDecrease();
+                this.colony.population.coreDecrease(this.minerCount);
             }
         }
     }
@@ -116,6 +119,10 @@ export class Remote {
         }
     }
 
+    public countMiners(): number {
+        return this.remoteLimits[ROLE_REMOTE_MINER];
+    }
+
     public Init(): void {
         this.remoteLimits[ROLE_REMOTE_MINER] = 2;
         this.remoteLimits[ROLE_REMOTE_DEFENDER] = 1;
@@ -128,7 +135,8 @@ export class Remote {
             roomName: this.roomName,
             name: this.name,
             remoteLimits: this.remoteLimits,
-            roles: this.roles.map((p) => p.Save())
+            roles: this.roles.map((p) => p.Save()),
+            minerCount: this.minerCount
         };
     }
 }

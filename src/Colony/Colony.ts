@@ -554,9 +554,12 @@ export class Colony {
                 break;
             }
         }
+        var miners = 0;
         if (index > 0) {
+            let miners = this.remotes[index].countMiners();
             this.remotes.splice(index, 1);
         }
+        this.population.removeRemote(miners);
     }
 
     public getColonyByRemote(roomName: string): Colony | null {
