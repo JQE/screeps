@@ -51,7 +51,8 @@ export class Population {
                 var body = BodyRepository.getBody(key as BodyType, this.spawnHeavy);
                 if (body) {
                     var spawnRequest = new SpawnRequest(key + " " + Game.time, 0, body, Game.time+1, this.colonyName);
-                    if (key === "miner") { spawnRequest.priority = 10;}
+                    if (key === BODY_MINER) { spawnRequest.priority = 10;}
+                    if (key === BODY_HAULER) { spawnRequest.priority = 9;}
                     var index = _.sortedIndexBy(this.spawnQueue, spawnRequest, (p) => p.priority * -10000 - p.age);
                     this.spawnQueue.splice(index, 0, spawnRequest);
                 }
@@ -113,15 +114,15 @@ export class Population {
     }
 
     private initLevel5(): void {
-        this.limits[BODY_LIGHT_WORKER] = 7;
+        this.limits[BODY_LIGHT_WORKER] = 6;
         this.limits[BODY_HAULER] = 2;
         this.limits[BODY_MINER] = 2;
         this.limits[BODY_DEFENDER] = 1;
     }
 
     private initLevel4(): void {
-        this.limits[BODY_LIGHT_WORKER] = 5;
-        this.limits[BODY_HAULER] = 2;
+        this.limits[BODY_LIGHT_WORKER] = 6;
+        this.limits[BODY_HAULER] = 0;
         this.limits[BODY_MINER] = 2;
         this.limits[BODY_DEFENDER] = 1;
     }

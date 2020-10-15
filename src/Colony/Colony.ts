@@ -96,6 +96,9 @@ export class Colony {
     private remotes: Remote[];
 
     public Load(): void {
+        if (this.level === 4 && this.roleLimits[ROLE_HAULER] < 2) {
+            this.checkStorage();
+        }
         this.findRepairStructures();
         this.checkRemote();
         this.addTowers();
@@ -156,8 +159,8 @@ export class Colony {
         for (let index in downList) {
             let key = downList[index];
             var count = 0;
-            for(let index in this.roles) {
-                var role = this.roles[index];
+            for(let i in this.roles) {
+                var role = this.roles[i];
                 count++;
                 if (role.type === key as RoleType && count > this.roleLimits[key] && !role.finished) {
                     console.log("Retiring: "+role.type);
@@ -316,12 +319,30 @@ export class Colony {
             let gclp = Math.round((Game.gcl.progress/Game.gcl.progressTotal) * 100);
             let gpro = gclp/ 10;
             let gclText = "GCL Level "+Game.gcl.level+" Upgrading: "+gclp+"%";
+            let spawnText = "Spawn Q :"+this.population.spawnQueue.length;
+            let repairText = "Repair Q :"+Memory.repair.length;
             visual.text(text, 2, 2, { align: "left", opacity: 0.8})
-                .rect(2,3,10,1, {fill: 'transparent', stroke: '#ffffff'})
-                .rect(2,3,progress,1, {fill: '#008000'})
-                .text(gclText, 2,5, { align: "left", opacity: 0.8})
-                .rect(2,6,10,1, {fill: 'transparent', stroke: '#ffffff'})
-                .rect(2,6,gpro,1, {fill: '#008000'});
+                .rect(2,2.3,10,0.8, {fill: 'transparent', stroke: '#ffffff'})
+                .rect(2,2.3,progress,0.8, {fill: '#008000'})
+                .text(gclText, 2,4, { align: "left", opacity: 0.8})
+                .rect(2,4.3,10,0.8, {fill: 'transparent', stroke: '#ffffff'})
+                .rect(2,4.3,gpro,0.8, {fill: '#008000'})
+                .text(spawnText, 2,6,{align: "left", opacity: 0.8})
+                .text(repairText, 7,6,{align: "left", opacity: 0.8});
+        }
+    }
+
+    public checkStorage(): void {
+        if (this.room.storage) {
+            this.roleLimits[ROLE_HARVESTER] = 2;
+            this.roleLimits[ROLE_UPGRADER] = 3;
+            this.roleLimits[ROLE_BUILDER] = 1;
+            this.roleLimits[ROLE_MECHANIC] = 0;
+            this.roleLimits[ROLE_HAULER] = 2;
+            this.roleLimits[ROLE_MINER] = 2;
+            this.roleLimits[ROLE_DEFENDER] = 1;
+            this.population.limits[BODY_HAULER] = 2;
+            this.population.limits[BODY_LIGHT_WORKER] = this.roleLimits[ROLE_HARVESTER] + this.roleLimits[ROLE_UPGRADER]+this.roleLimits[ROLE_BUILDER]+this.roleLimits[ROLE_MECHANIC];
         }
     }
 
@@ -379,9 +400,9 @@ export class Colony {
     }
 
     private initLevel5(): void {
-        this.roleLimits[ROLE_HARVESTER] = 3;
-        this.roleLimits[ROLE_UPGRADER] = 1;
-        this.roleLimits[ROLE_BUILDER] = 3;
+        this.roleLimits[ROLE_HARVESTER] = 2;
+        this.roleLimits[ROLE_UPGRADER] = 2;
+        this.roleLimits[ROLE_BUILDER] = 2;
         this.roleLimits[ROLE_MECHANIC] = 0;
         this.roleLimits[ROLE_HAULER] = 2;
         this.roleLimits[ROLE_MINER] = 2;
@@ -389,9 +410,9 @@ export class Colony {
     }
 
     private initLevel4(): void {
-        this.roleLimits[ROLE_HARVESTER] = 2;
-        this.roleLimits[ROLE_UPGRADER] = 2;
-        this.roleLimits[ROLE_BUILDER] = 1;
+        this.roleLimits[ROLE_HARVESTER] = 1;
+        this.roleLimits[ROLE_UPGRADER] = 1;
+        this.roleLimits[ROLE_BUILDER] = 4;
         this.roleLimits[ROLE_MECHANIC] = 0;
         this.roleLimits[ROLE_HAULER] = 2;
         this.roleLimits[ROLE_MINER] = 2;

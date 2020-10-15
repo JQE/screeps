@@ -77,6 +77,7 @@ export class Empire {
                 colony.initRoles(1);
                 this.colonies.push(colony);
                 flag.remove();
+                remoteFlag?.remove();
             }
         }
     }

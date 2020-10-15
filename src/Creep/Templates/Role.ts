@@ -65,6 +65,18 @@ export abstract class Role {
     }
 
     public canRetire(): void {
+        if (this.body === BODY_LIGHT_WORKER) {
+            if (this.creepId) {
+                if (!this.creep) {
+                    this.creep = Game.getObjectById(this.creepId);
+                }
+                if(this.creep) {
+                    delete this.creep.memory.role;
+                    delete this.creep;
+                    delete this.creepId;
+                }
+            }
+        }
         this.finished = true;
     }
 
