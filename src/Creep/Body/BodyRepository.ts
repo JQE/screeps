@@ -94,7 +94,7 @@ export class BodyRepository {
             BODY_RUNNER,
             200,
             [MOVE,CARRY,MOVE,CARRY],
-            [MOVE,CARRY,MOVE,CARRY,MOVE,CARRY,MOVE,CARRY],
+            [MOVE,CARRY,MOVE,CARRY,MOVE,CARRY,MOVE,CARRY,MOVE,CARRY,MOVE,CARRY,MOVE,CARRY,MOVE,CARRY],
             false
         );
     }
