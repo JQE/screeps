@@ -61,7 +61,7 @@ export class RMiner extends Role {
         }
         if (this.linkId && this.useLink) {
             this.link = Game.getObjectById(this.linkId);
-            if (!this.link || this.link.store.getFreeCapacity(RESOURCE_ENERGY) <= 50) {
+            if (!this.link) {
                 delete this.linkId;
             }
         }

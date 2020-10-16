@@ -59,6 +59,16 @@ export class BodyRepository {
         );
     }
 
+    public static ScoutClaimer(): Body {
+        return new Body(
+            BODY_SCOUT_CLAIMER,
+            1600,
+            [TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,CLAIM,CLAIM],
+            [],
+            false
+        );
+    }
+
     public static Scout(): Body {
         return new Body(
             BODY_SCOUT,
@@ -75,7 +85,7 @@ export class BodyRepository {
             1250,
             [WORK,WORK,WORK,MOVE,MOVE,MOVE,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE],
             [WORK,WORK,MOVE,MOVE,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE],
-            true
+            false
         );
     }
 
@@ -93,8 +103,8 @@ export class BodyRepository {
         return new Body(
             BODY_HAULER,
             200,
-            [MOVE,CARRY,MOVE,CARRY,MOVE,CARRY],
             [MOVE,CARRY,MOVE,CARRY],
+            [MOVE,CARRY,MOVE,CARRY,MOVE,CARRY],
             false
         );
     }

@@ -18,6 +18,7 @@ export class Colony {
         colony.level = memory.level;
         if(colony.level === undefined) colony.level = 1;
         colony.minerSpots = memory.minerSpot;
+        colony.newColonyName = memory.newColonyName;
         for (let key in memory.towers) {
             let towerMemory = memory.towers[key];
             colony.towers.push(Tower.fromMemory(towerMemory));
@@ -99,6 +100,8 @@ export class Colony {
     private towers: Tower[] = [];
     private linkSets?: LinkSet;
     private remotes: Remote[];
+
+    public newColonyName?: string;
 
     public Load(): void {
         if (this.level === 4 && this.roleLimits[ROLE_HAULER] < 2) {
@@ -377,6 +380,14 @@ export class Colony {
         }
         this.population.initLevel(level);
         this.level = level;
+    }
+
+    public addColonyRemote(flag:Flag): void {
+        if (flag && flag.name === "newColony") {
+            this.roleLimits[ROLE_SCOUT_CLAIMER] = 1;
+            this.population.addScoutClaimer();
+            this.newColonyName = flag.name;
+        }
     }
 
     private checkRemote(): void {
@@ -678,7 +689,8 @@ export class Colony {
             level: this.level,
             towers: this.towers.map((p) => p.Save()),
             remotes: this.getRemoteMemory(),
-            linkSets: this.linkSets?.Save()
+            linkSets: this.linkSets?.Save(),
+            newColonyName: this.newColonyName,
         }
     }
 }

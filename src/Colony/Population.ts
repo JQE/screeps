@@ -210,6 +210,13 @@ export class Population {
         this.limits[BODY_REMOTE_CLAIMER] = this.remoteCount;
     }
 
+    public addScoutClaimer(): void {
+        if (!this.limits[BODY_SCOUT_CLAIMER]) {
+            this.limits[BODY_SCOUT_CLAIMER] = 0;
+        }
+        this.limits[BODY_SCOUT_CLAIMER]++;
+    }
+
     public addScout(): void {
         if (!this.limits[BODY_SCOUT]) {
             this.limits[BODY_SCOUT] = 0;

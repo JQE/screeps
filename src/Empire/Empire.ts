@@ -89,7 +89,7 @@ export class Empire {
 
     public addColonies(): void {
         let flag = this.findFlags();
-        if (flag && flag.room !== undefined) {
+        if (flag && flag.room !== undefined && flag.room.controller && flag.room.controller.owner && flag.room.controller.owner.username === "JQE") {
             let name = "Colony " + flag.room.name;
             if (this.colonyExists(global.empire, name)) {
                 return;
@@ -99,6 +99,15 @@ export class Empire {
                 colony.initRoles(1);
                 this.colonies.push(colony);
                 flag.remove();
+                let oldColony = this.colonies[0];
+                if (oldColony) {
+                    delete oldColony.newColonyName;
+                }
+            }
+        } else if (flag) {
+            let colony = this.colonies[0];
+            if (colony && !colony.newColonyName) {
+                colony.addColonyRemote(flag);
             }
         }
     }

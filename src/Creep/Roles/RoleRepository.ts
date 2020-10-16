@@ -8,6 +8,7 @@ import { Mechanic } from "./Mechanic";
 import { Miner } from "./Miner";
 import { Runner } from "./Runner";
 import { Scout } from "./Scout";
+import { ScoutClaimer } from "./ScoutClaimer";
 import { Upgrader } from "./Upgrader";
 
 export class RoleRepository {
@@ -38,9 +39,19 @@ export class RoleRepository {
                 return this.Defender();
             case ROLE_RUNNER:
                 return this.Runner();
+            case ROLE_SCOUT_CLAIMER:
+                if (hq) {
+                    return this.ScoutClaimer(hq);
+                } else {
+                    return null;
+                }
             default:
                 return null;
         }
+    }
+
+    public static ScoutClaimer(hq: string): ScoutClaimer {
+        return new ScoutClaimer(false, false, hq);
     }
 
     public static Defender(): Defender {

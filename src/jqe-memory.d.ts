@@ -12,6 +12,13 @@ export interface ScoutLocation {
     roomname: string
 }
 
+export interface ScoutClaimerMemory extends RoleMemory {
+    hq: string;
+    target?: ScoutLocation;
+    arrived: boolean;
+    controllerId?: Id<StructureController>;
+}
+
 export interface ScoutMemory extends RoleMemory {
     hq: string;
     target?: ScoutLocation;
@@ -148,6 +155,7 @@ export interface ColonyMemory {
     towers: TowerMemory[];
     linkSets?: LinkSetMemory;
     remotes: { [ remoteName: string]: RemoteMemory};
+    newColonyName?: string;
 }
 
 export interface SpawnRequestMemory {

@@ -132,6 +132,11 @@ export class Remote {
         return this.remoteLimits[ROLE_REMOTE_MINER];
     }
 
+    public InitForColony(): void {
+        this.remoteLimits[ROLE_REMOTE_CLAIMER] = 1;
+        this.remoteLimits[ROLE_REMOTE_DEFENDER] = 1;
+    }
+
     public Init(): void {
         this.remoteLimits[ROLE_REMOTE_MINER] = 2;
         this.remoteLimits[ROLE_REMOTE_DEFENDER] = 1;
