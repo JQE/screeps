@@ -39,6 +39,11 @@ export interface DefenderMemory extends RoleMemory {
     muster?: ScoutLocation;
 }
 
+export interface RunnerMemory extends RoleMemory {
+    storageId?: Id<StructureStorage>;
+    depositId?: DepositTargetIds;
+}
+
 export interface HaulerMemory extends RoleMemory {
     containerId?: Id<StructureContainer>;
     storageId?: Id<StructureStorage>;
@@ -54,6 +59,7 @@ export interface RMinerMemory extends RoleMemory {
     depositId?: DepositTargetIds;
     storageId?: Id<StructureStorage>;
     linkId?: Id<StructureLink>;
+    useLink: boolean;
 }
 
 export interface MinerMemory extends RoleMemory {

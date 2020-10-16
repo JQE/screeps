@@ -6,6 +6,7 @@ import { Harvester } from "./Harvester";
 import { Hauler } from "./Hauler";
 import { Mechanic } from "./Mechanic";
 import { Miner } from "./Miner";
+import { Runner } from "./Runner";
 import { Scout } from "./Scout";
 import { Upgrader } from "./Upgrader";
 
@@ -34,7 +35,9 @@ export class RoleRepository {
                     return null;
                 }
             case ROLE_DEFENDER:
-                    return this.Defender();
+                return this.Defender();
+            case ROLE_RUNNER:
+                return this.Runner();
             default:
                 return null;
         }
@@ -46,6 +49,10 @@ export class RoleRepository {
 
     public static Scout(hq: string): Scout {
         return new Scout(false, false, hq);
+    }
+
+    public static Runner(): Runner {
+        return new Runner(false, false);
     }
 
     public static Hauler(): Hauler {

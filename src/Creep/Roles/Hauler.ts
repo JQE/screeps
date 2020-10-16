@@ -1,6 +1,5 @@
 import { Role } from "Creep/Templates/Role";
 import { HaulerMemory } from "jqe-memory";
-import { threadId } from "worker_threads";
 
 export class Hauler extends Role {
     public static fromMemory(memory: HaulerMemory): Hauler {
@@ -25,6 +24,7 @@ export class Hauler extends Role {
     private deposit?: DepositTargets | null;
 
     protected onLoad(): void {
+        let storeRange = 100000;
         if (this.containerId) {
             this.container = Game.getObjectById(this.containerId);
             if (!this.container || this.container.store.getUsedCapacity(RESOURCE_ENERGY) < 50) {
@@ -35,6 +35,9 @@ export class Hauler extends Role {
             this.storage = Game.getObjectById(this.storageId);
             if (!this.storage || this.storage.store.getFreeCapacity(RESOURCE_ENERGY) < 50) {
                 delete this.storageId;
+            }
+            if (this.storage && this.creep) {
+                storeRange = this.creep.pos.getRangeTo(this.storage);
             }
         }
         if (this.depositId) {

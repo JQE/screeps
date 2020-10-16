@@ -5,6 +5,7 @@ global.BODY_DEFENDER = "defender";
 global.BODY_HAULER = "hauler";
 global.BODY_REMOTE_MINER = "remoteminer";
 global.BODY_SCOUT = "scout";
+global.BODY_RUNNER = "runner";
 global.BODY_REMOTE_DEFENDER = "remotedefender";
 global.BODY_REMOTE_CLAIMER = "remoteclaimer";
 
@@ -16,6 +17,7 @@ global.ROLE_MINER = "roleminer";
 global.ROLE_MECHANIC = "rolemechanic";
 global.ROLE_HAULER = "rolehauler";
 global.ROLE_SCOUT = "rolescout";
+global.ROLE_RUNNER = "rolerunner";
 
 
 global.ROLE_REMOTE_MINER = "rolerminer";

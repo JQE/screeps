@@ -2,13 +2,14 @@ import { Builder, Harvester, Hauler, Mechanic, Miner , RoleRepository, Upgrader 
 import { Defender } from "Creep/Roles/Defender";
 import { Scout } from "Creep/Roles/Scout";
 import { Role } from "Creep/Templates/Role";
-import { BuilderMemory, ColonyMemory,DefenderMemory,HarvesterMemory,HaulerMemory,LinkSetMemory,MechanicMemory,MinerMemory, RemoteMemory, ScoutMemory, UpgraderMemory } from "jqe-memory";
+import { BuilderMemory, ColonyMemory,DefenderMemory,HarvesterMemory,HaulerMemory,LinkSetMemory,MechanicMemory,MinerMemory, RemoteMemory, RunnerMemory, ScoutMemory, UpgraderMemory } from "jqe-memory";
 import { LinkSet } from "Link/LinkSet";
 import { Spawner } from "Spawn/Spawner";
 import { Tower } from "Tower/Tower";
 import { Population } from "./Population";
 import { Remote } from "./Remote";
 import * as _ from 'lodash';
+import { Runner } from "Creep/Roles/Runner";
 
 export class Colony {
     public static fromMemory(memory: ColonyMemory): Colony {
@@ -55,6 +56,10 @@ export class Colony {
                     break;
                 case ROLE_DEFENDER:
                     colony.roles.push(Defender.fromMemory(role as DefenderMemory));
+                    break;
+                case ROLE_RUNNER:
+                    colony.roles.push(Runner.fromMemory(role as RunnerMemory));
+                    break;
                 default:
 
             }
@@ -169,7 +174,6 @@ export class Colony {
                     }
                 }
             }
-
         }
         for (let key in this.remotes) {
             let remote = this.remotes[key];
@@ -405,13 +409,14 @@ export class Colony {
     }
 
     private initLevel5(): void {
-        this.roleLimits[ROLE_HARVESTER] = 2;
+        this.roleLimits[ROLE_HARVESTER] = 0;
         this.roleLimits[ROLE_UPGRADER] = 2;
         this.roleLimits[ROLE_BUILDER] = 2;
         this.roleLimits[ROLE_MECHANIC] = 0;
         this.roleLimits[ROLE_HAULER] = 2;
         this.roleLimits[ROLE_MINER] = 2;
         this.roleLimits[ROLE_DEFENDER] = 1;
+        this.roleLimits[ROLE_RUNNER] = 2;
     }
 
     private initLevel4(): void {
@@ -422,6 +427,7 @@ export class Colony {
         this.roleLimits[ROLE_HAULER] = 2;
         this.roleLimits[ROLE_MINER] = 2;
         this.roleLimits[ROLE_DEFENDER] = 1;
+        this.roleLimits[ROLE_RUNNER] = 0;
     }
 
     private initLevel3(): void {
@@ -432,6 +438,7 @@ export class Colony {
         this.roleLimits[ROLE_HAULER] = 0;
         this.roleLimits[ROLE_MINER] = 2;
         this.roleLimits[ROLE_DEFENDER] = 0;
+        this.roleLimits[ROLE_RUNNER] = 0;
     }
 
     private initLevel2(): void {
@@ -442,6 +449,7 @@ export class Colony {
         this.roleLimits[ROLE_HAULER] = 0;
         this.roleLimits[ROLE_MINER] = 2;
         this.roleLimits[ROLE_DEFENDER] = 0;
+        this.roleLimits[ROLE_RUNNER] = 0;
 
     }
 
@@ -453,6 +461,7 @@ export class Colony {
         this.roleLimits[ROLE_HAULER] = 0;
         this.roleLimits[ROLE_MINER] = 0;
         this.roleLimits[ROLE_DEFENDER] = 0;
+        this.roleLimits[ROLE_RUNNER] = 0;
     }
 
     private initLevel0(): void {
@@ -463,6 +472,7 @@ export class Colony {
         this.roleLimits[ROLE_HAULER] = 0;
         this.roleLimits[ROLE_MINER] = 0;
         this.roleLimits[ROLE_DEFENDER] = 0;
+        this.roleLimits[ROLE_RUNNER] = 0;
     }
 
     private getSpots(): void {

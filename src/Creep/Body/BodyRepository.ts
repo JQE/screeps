@@ -22,6 +22,8 @@ export class BodyRepository {
                 return this.RemoteDefender();
             case BODY_REMOTE_CLAIMER:
                 return this.RemoteClaimer();
+            case BODY_RUNNER:
+                return this.Runner();
             default:
                 return null;
         }
@@ -74,6 +76,16 @@ export class BodyRepository {
             [WORK,WORK,WORK,MOVE,MOVE,MOVE,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE],
             [WORK,WORK,MOVE,MOVE,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE],
             true
+        );
+    }
+
+    public static Runner(): Body {
+        return new Body(
+            BODY_RUNNER,
+            200,
+            [MOVE,CARRY,MOVE,CARRY],
+            [MOVE,CARRY,MOVE,CARRY,MOVE,CARRY,MOVE,CARRY],
+            false
         );
     }
 
