@@ -48,6 +48,7 @@ export class Remote {
     private minerCount: number = 0;
 
     public Load(): void {
+        var downList = [];
         for (var key in this.remoteLimits) {
             var count = _.sumBy(this.roles, (role) => role.type === key ? 1: 0);
             if (count < this.remoteLimits[key]) {
@@ -56,9 +57,17 @@ export class Remote {
                     this.roles.push(newRole);
                 }
             } else if (count > this.remoteLimits[key]) {
-                for (var index = this.remoteLimits[key]; index < count; index++) {
-                    var role = this.roles[index];
-                    if (role.finished === false) {
+                downList.push(key);
+            }
+        }
+        for (let index in downList) {
+            let key = downList[index];
+            var count = 0;
+            for(let i in this.roles) {
+                var role = this.roles[i];
+                if (role.type === key as RoleType) {
+                    count++;
+                    if (count > this.remoteLimits[key] && !role.finished) {
                         console.log("Retiring: "+role.type);
                         role.canRetire();
                     }
@@ -79,7 +88,7 @@ export class Remote {
                 this.colony.population.coreIncrease(this.minerCount);
             } else if (core.length === 0 && this.remoteLimits[ROLE_REMOTE_DEFENDER] !== 1) {
                 this.remoteLimits[ROLE_REMOTE_DEFENDER] = 1;
-                this.remoteLimits[ROLE_REMOTE_MINER] = 2;
+                this.remoteLimits[ROLE_REMOTE_MINER] = this.minerCount;
                 this.colony.population.coreDecrease(this.minerCount);
             }
         }

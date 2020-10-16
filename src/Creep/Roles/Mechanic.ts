@@ -14,6 +14,7 @@ export class Mechanic extends Role {
         mechanic.structureId = memory.structureId;
         mechanic.controllerId = memory.controllerId;
         mechanic.storageId = memory.storageId;
+        mechanic.depositId = memory.depositId;
         return mechanic;
     }
 
@@ -25,6 +26,7 @@ export class Mechanic extends Role {
     private tombstoneId?: Id<Tombstone>;
     private resourceId?: Id<Resource>;
     private containerId?: Id<StructureContainer>;
+    private depositId?: Id<StructureTower>;
     private siteId?: Id<ConstructionSite>;
     private structureId?: Id<Structure>;
     private controllerId?: Id<StructureController>;
@@ -34,6 +36,7 @@ export class Mechanic extends Role {
     private tombstone?: Tombstone | null;
     private resource?: Resource | null;
     private container?: StructureContainer | null;
+    private deposit?: StructureTower | null;
     private site?: ConstructionSite | null;
     private structure?: Structure | null;
     private controller?: StructureController | null;
@@ -73,14 +76,14 @@ export class Mechanic extends Role {
         if (this.structureId) {
             this.structure = Game.getObjectById(this.structureId);
             if (!this.structure || this.structure.hits == this.structure.hitsMax) {
+                delete this.structureId;
+            } else {
                 for (let index in Memory.repair) {
                     if (Memory.repair[index].structureId === this.structureId) {
-                        Memory.repair[index].assigned--;
-                        if (Memory.repair[index].assigned < 0) Memory.repair[index].assigned = 0;
+                        Memory.repair[index].assigned++;
                         break;
                     }
                 }
-                delete this.structureId;
             }
         }
         if (this.controllerId) {
@@ -93,6 +96,12 @@ export class Mechanic extends Role {
             this.storage = Game.getObjectById(this.storageId);
             if(!this.storage) {
                 delete this.storageId;
+            }
+        }
+        if (this.depositId) {
+            this.deposit = Game.getObjectById(this.depositId);
+            if (!this.deposit || this.deposit.store.getFreeCapacity(RESOURCE_ENERGY) < 50) {
+                delete this.depositId;
             }
         }
     };
@@ -116,13 +125,6 @@ export class Mechanic extends Role {
                 if (this.creep.store.getUsedCapacity(RESOURCE_ENERGY) <= 0) {
                     this.working = true;
                     delete this.siteId;
-                    for (let index in Memory.repair) {
-                        if (Memory.repair[index].structureId === this.structureId) {
-                            Memory.repair[index].assigned--;
-                            if (Memory.repair[index].assigned < 0) Memory.repair[index].assigned = 0;
-                            break;
-                        }
-                    }
                     delete this.structureId;
                     delete this.controllerId;
                 } else {
@@ -161,7 +163,11 @@ export class Mechanic extends Role {
                     }
                 }
             } else {
-                if (this.structure) {
+                if (this.deposit) {
+                    if (this.creep.transfer(this.deposit, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+                        this.creep.travelTo(this.deposit);
+                    }
+                } else if (this.structure) {
                     if (this.creep.repair(this.structure) === ERR_NOT_IN_RANGE) {
                         this.creep.travelTo(this.structure);
                     }
@@ -228,22 +234,14 @@ export class Mechanic extends Role {
 
     private findWork() {
         if (this.creep) {
-            let repair = null;
-            Memory.repair.sort((a, b) => {
-                if (a.assigned < b.assigned) return -1;
-                if (a.assigned > b.assigned) return 1;
-                if (a.hits < b.hits) return -1;
-                if (a.hits > b.hits) return 1;
-                return 0;
-            });
-            for (let key in Memory.repair) {
-                if (Memory.repair[key].assigned <= 0) {
-                    repair = Memory.repair[key];
-                    Memory.repair[key].assigned = 1;
-                    break;
-                }
-            }
-            if (!repair && Memory.repair.length > 0) {
+            let tower = this.creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
+                filter: (tower) => tower.structureType == STRUCTURE_TOWER && tower.store.getFreeCapacity(RESOURCE_ENERGY) >= 50
+            }) as StructureTower;
+            if (tower) {
+                this.depositId = tower.id;
+                this.deposit = tower;
+            } else {
+                let repair = null;
                 Memory.repair.sort((a, b) => {
                     if (a.assigned < b.assigned) return -1;
                     if (a.assigned > b.assigned) return 1;
@@ -251,21 +249,37 @@ export class Mechanic extends Role {
                     if (a.hits > b.hits) return 1;
                     return 0;
                 });
-                repair = Memory.repair[0];
-                Memory.repair[0].assigned++;
-            }
-            if (repair) {
-                this.structureId = repair.structureId;
-                this.structure = Game.getObjectById(repair.structureId);
-            } else {
-                let site = this.creep.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
-                if (site) {
-                    this.site = site;
-                    this.siteId = site.id;
+                for (let key in Memory.repair) {
+                    if (Memory.repair[key].assigned <= 0) {
+                        repair = Memory.repair[key];
+                        Memory.repair[key].assigned = 1;
+                        break;
+                    }
+                }
+                if (!repair && Memory.repair.length > 0) {
+                    Memory.repair.sort((a, b) => {
+                        if (a.assigned < b.assigned) return -1;
+                        if (a.assigned > b.assigned) return 1;
+                        if (a.hits < b.hits) return -1;
+                        if (a.hits > b.hits) return 1;
+                        return 0;
+                    });
+                    repair = Memory.repair[0];
+                    Memory.repair[0].assigned++;
+                }
+                if (repair) {
+                    this.structureId = repair.structureId;
+                    this.structure = Game.getObjectById(repair.structureId);
                 } else {
-                    if (this.creep.room.controller) {
-                        this.controllerId = this.creep.room.controller.id;
-                        this.controller = this.creep.room.controller;
+                    let site = this.creep.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
+                    if (site) {
+                        this.site = site;
+                        this.siteId = site.id;
+                    } else {
+                        if (this.creep.room.controller) {
+                            this.controllerId = this.creep.room.controller.id;
+                            this.controller = this.creep.room.controller;
+                        }
                     }
                 }
             }

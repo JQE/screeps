@@ -45,8 +45,9 @@ export class Hauler extends Role {
         }
         if(this.destLinkId) {
             this.link = Game.getObjectById(this.destLinkId);
-            if (!this.link || this.link.store.getUsedCapacity(RESOURCE_ENERGY) < 50) {
+            if (!this.link || this.link.store.getUsedCapacity(RESOURCE_ENERGY) <= 0) {
                 delete this.destLinkId;
+                delete this.link;
             }
         }
     };
@@ -77,7 +78,7 @@ export class Hauler extends Role {
     protected onExecute(): void {
         if (this.creep) {
             if (this.working) {
-                if (this.link && this.link.store.getUsedCapacity(RESOURCE_ENERGY) >= 50) {
+                if (this.link) {
                     if (this.creep.withdraw(this.link, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
                         this.creep.travelTo(this.link);
                     }

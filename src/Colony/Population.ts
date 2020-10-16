@@ -56,6 +56,27 @@ export class Population {
                     var index = _.sortedIndexBy(this.spawnQueue, spawnRequest, (p) => p.priority * -10000 - p.age);
                     this.spawnQueue.splice(index, 0, spawnRequest);
                 }
+            } else if (needMore > this.limits[key]) {
+                let downList = [];
+                let count = 0;
+                for(let index in this.spawnQueue) {
+                    let req = this.spawnQueue[index];
+                    if (req) {
+                        if (req.body.type === key as BodyType) {
+                            count++;
+                            if (count > this.limits[key]) {
+                                downList.push(req);
+                            }
+                        }
+                    }
+                }
+                for (let index in downList) {
+                    let req = downList[index];
+                    if (req) {
+                        let i = this.spawnQueue.indexOf(req);
+                        this.spawnQueue.splice(i, 1);
+                    }
+                }
             }
         }
     }
@@ -91,6 +112,9 @@ export class Population {
     public initLevel(level: number) : void {
         if (level !== this.level) {
             switch(level) {
+                case 0:
+                    this.initLevel0();
+                    break;
                 case 1:
                     this.initLevel1();
                     break;
@@ -104,7 +128,7 @@ export class Population {
                     this.initLevel4();
                     break;
                 case 5:
-                    this.initLevel5();
+                    //this.initLevel5();
                     break;
                 default:
                     return;
@@ -143,6 +167,13 @@ export class Population {
 
     private initLevel1(): void {
         this.limits[BODY_LIGHT_WORKER] = 4;
+        this.limits[BODY_HAULER] = 0;
+        this.limits[BODY_MINER] = 0;
+        this.limits[BODY_DEFENDER] = 0;
+    }
+
+    private initLevel0(): void {
+        this.limits[BODY_LIGHT_WORKER] = 0;
         this.limits[BODY_HAULER] = 0;
         this.limits[BODY_MINER] = 0;
         this.limits[BODY_DEFENDER] = 0;

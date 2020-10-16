@@ -79,7 +79,7 @@ export class Colony {
             let spawn = spawns[key];
             this.spawners.push(new Spawner(spawn.id));
         }
-
+        this.level = 0;
     }
 
     public roomName: string;
@@ -161,10 +161,12 @@ export class Colony {
             var count = 0;
             for(let i in this.roles) {
                 var role = this.roles[i];
-                count++;
-                if (role.type === key as RoleType && count > this.roleLimits[key] && !role.finished) {
-                    console.log("Retiring: "+role.type);
-                    role.canRetire();
+                if (role.type === key as RoleType) {
+                    count++;
+                    if (count > this.roleLimits[key] && !role.finished) {
+                        console.log("Retiring: "+role.type);
+                        role.canRetire();
+                    }
                 }
             }
 
@@ -348,6 +350,9 @@ export class Colony {
 
     public initRoles(level: number): void {
         switch(level) {
+            case 0:
+                this.initLevel0();
+                break;
             case 1:
                 this.initLevel1();
                 break;
@@ -361,7 +366,7 @@ export class Colony {
                 this.initLevel4();
                 break;
             case 5:
-                this.initLevel5();
+                //this.initLevel5();
                 break;
             default:
                 return;
@@ -372,8 +377,8 @@ export class Colony {
 
     private checkRemote(): void {
         let scoutLocations = 0;
-        for(let key in Game.flags) {
-            let flag = Game.flags[key];
+        let flag = Game.flags[this.name];
+        if (flag) {
             if (flag.name === this.name) {
                 if (flag.room) {
                     console.log("Found a remote room");
@@ -450,6 +455,16 @@ export class Colony {
         this.roleLimits[ROLE_DEFENDER] = 0;
     }
 
+    private initLevel0(): void {
+        this.roleLimits[ROLE_HARVESTER] = 0;
+        this.roleLimits[ROLE_UPGRADER] = 0;
+        this.roleLimits[ROLE_BUILDER] = 0;
+        this.roleLimits[ROLE_MECHANIC] = 0;
+        this.roleLimits[ROLE_HAULER] = 0;
+        this.roleLimits[ROLE_MINER] = 0;
+        this.roleLimits[ROLE_DEFENDER] = 0;
+    }
+
     private getSpots(): void {
         if (this.minerSpots.length > 0) {
             return;
@@ -506,6 +521,7 @@ export class Colony {
                     }
 
                     if (targetId && sourceId) {
+                        console.log("Adding link set");
                         let linkSet = new LinkSet(sourceId, targetId);
                         this.linkSets = linkSet;
                     }
@@ -517,6 +533,22 @@ export class Colony {
                         if (link) {
                             if (this.linkSets.checkSource(link as StructureLink)) {
                                 this.linkSets.addSource(link as StructureLink);
+                            }
+                            if (!this.room.memory.linkDepositId) {
+                                this.room.memory.linkDepositId = [];
+                            }
+                            if (this.linkSets.destId !== link.id) {
+                                var found = false;
+                                for (let index in this.room.memory.linkDepositId) {
+                                    let linkDeposit = this.room.memory.linkDepositId[index];
+                                    if (linkDeposit && linkDeposit === link.id) {
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                                if (!found) {
+                                    this.room.memory.linkDepositId.push(link.id as Id<StructureLink>);
+                                }
                             }
                         }
                     }
@@ -599,6 +631,7 @@ export class Colony {
                     if (Memory.repair[index].structureId === repair.id) {
                         found = true;
                         Memory.repair[index].hits = repair.hits;
+                        Memory.repair[index].assigned = 0;
                         break;
                     }
                 }

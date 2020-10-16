@@ -69,6 +69,7 @@ export interface MechanicMemory extends RoleMemory {
     containerId?: Id<StructureContainer>;
     storageId?: Id<StructureStorage>;
 
+    depositId?: Id<StructureTower>;
     structureId?: Id<Structure>;
     siteId?: Id<ConstructionSite>;
     controllerId?: Id<StructureController>;

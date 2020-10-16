@@ -34,21 +34,18 @@ export class RDefender extends Role {
        if (this.coreId) {
            this.core = Game.getObjectById(this.coreId);
        }
-       for (let key in Game.flags) {
-           let flag = Game.flags[key];
-           if (flag.room && flag.name === "muster "+this.targetRoom) {
-                this.flag = flag;
-                break;
-           }
-       }
-       if (this.flag && this.flag.room && this.creep) {
-           if (this.flag.room.name === this.creep.room.name) {
-                this.inRoom = true;
-           } else {
-               this.inRoom = false;
-               this.arrived = false;
-           }
-       }
+       let flag = Game.flags["muster "+this.targetRoom];
+        if (flag) {
+            this.flag = flag;
+        }
+        if (this.flag && this.flag.room && this.creep) {
+            if (this.flag.room.name === this.creep.room.name) {
+                 this.inRoom = true;
+            } else {
+                this.inRoom = false;
+                this.arrived = false;
+            }
+        }
     }
 
     public onUpdate(): void {

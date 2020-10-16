@@ -70,10 +70,10 @@ export class BodyRepository {
     public static RemoteMiner(): Body {
         return new Body(
             BODY_REMOTE_MINER,
-            700,
-            [WORK,MOVE,MOVE,MOVE,MOVE,CARRY,CARRY,WORK,MOVE,MOVE,CARRY,CARRY],
-            [MOVE,WORK,MOVE,CARRY,MOVE,CARRY],
-            false
+            1250,
+            [WORK,WORK,WORK,MOVE,MOVE,MOVE,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE],
+            [WORK,WORK,MOVE,MOVE,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE],
+            true
         );
     }
 
@@ -82,7 +82,7 @@ export class BodyRepository {
             BODY_HAULER,
             200,
             [MOVE,CARRY,MOVE,CARRY,MOVE,CARRY],
-            [],
+            [MOVE,CARRY,MOVE,CARRY],
             false
         );
     }
@@ -111,7 +111,7 @@ export class BodyRepository {
             BODY_LIGHT_WORKER,
             750,
             [WORK,CARRY,MOVE,MOVE,WORK,CARRY,MOVE,MOVE,WORK,CARRY,MOVE,MOVE],
-            [MOVE,WORK,MOVE,CARRY,MOVE,WORK,MOVE,CARRY],
+            [MOVE,WORK,MOVE,CARRY,MOVE,WORK,MOVE,CARRY,MOVE,CARRY,MOVE,CARRY,MOVE,CARRY,MOVE,CARRY],
             false
         );
     }

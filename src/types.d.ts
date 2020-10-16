@@ -14,6 +14,7 @@ interface RoomMemory {
   colonyName: string;
   avoid?: number;
   upgrade: boolean;
+  linkDepositId?: Id<StructureLink>[];
 }
 
 interface LinkMemory {

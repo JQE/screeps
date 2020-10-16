@@ -64,12 +64,9 @@ export class RMiner extends Role {
         if (this.parentRoomName) {
             this.parentRoom = Game.rooms[this.parentRoomName];
         }
-        for(let key in Game.flags) {
-            var flag = Game.flags[key];
-            if (flag.name === "muster "+this.targetRoom) {
-                this.roomFlag = flag;
-                break;
-            }
+        let flag = Game.flags["muster "+this.targetRoom];
+        if (flag) {
+            this.roomFlag = flag;
         }
         if (this.arrived && this.creep?.room.name !== this.targetRoom && !this.source) {
             this.arrived = false;
@@ -124,12 +121,15 @@ export class RMiner extends Role {
                     }
                 }
             } else {
-                if (this.storage) {
+                if (this.link) {
+                    if (this.creep.transfer(this.link, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+                        this.creep.travelTo(this.link);
+                    }
+                } else if (this.storage) {
                     if(this.creep.transfer(this.storage, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
                         this.creep.travelTo(this.storage);
                     }
-                }
-                if (this.deposit) {
+                } else if (this.deposit) {
                     if (this.creep.transfer(this.deposit, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                         this.creep.travelTo(this.deposit);
                     }
@@ -141,9 +141,21 @@ export class RMiner extends Role {
 
     private findDepositTarget() {
         if (this.creep) {
-            var link = this.creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
-                filter: (structure: StructureLink) => structure.structureType === STRUCTURE_LINK
-            }) as StructureLink;
+            var link = null;
+            let range = 10000;
+            if (this.parentRoom?.memory.linkDepositId) {
+                for (let key in this.parentRoom.memory.linkDepositId) {
+                    let depositId = this.parentRoom.memory.linkDepositId[key];
+                    let deposit = Game.getObjectById(depositId);
+                    if (deposit) {
+                        let checkRange = this.creep.pos.getRangeTo(deposit);
+                        if (checkRange < range) {
+                            range = checkRange;
+                            link = deposit;
+                        }
+                    }
+                }
+            }
             if (link) {
                 this.link = link;
                 this.linkId = link.id;

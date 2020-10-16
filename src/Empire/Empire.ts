@@ -63,21 +63,26 @@ export class Empire {
     public upgradeRemote(): void {
         let flag = this.findUpgradeFlags();
         if (flag && flag.room !== undefined) {
-            let remoteFlag = this.findRemoteFlag(flag.room.name);
-            let name = "Colony " + flag.room.name;
-            if (this.colonyExists(global.empire, name)) {
-                return;
-            }
-            var oldColony = this.getColonyByRemote(flag.room.name);
-            if (oldColony) {
-                oldColony.removeRemote(flag.room.name);
-            }
-            let colony = this.addColonyFromFlag(flag, name);
-            if (colony) {
-                colony.initRoles(1);
-                this.colonies.push(colony);
-                flag.remove();
-                remoteFlag?.remove();
+            if (!flag.room.memory.upgrade) {
+                flag.room.memory.upgrade = true;
+            } else if (flag.room.controller !== undefined && flag.room.controller.owner !== undefined && flag.room.controller.owner.username === "JQE") {
+                let remoteFlag = this.findRemoteFlag(flag.room.name);
+                let name = "Colony " + flag.room.name;
+                if (this.colonyExists(global.empire, name)) {
+                    flag.remove();
+                    return;
+                }
+                var oldColony = this.getColonyByRemote(flag.room.name);
+                if (oldColony) {
+                    oldColony.removeRemote(flag.room.name);
+                }
+                let colony = this.addColonyFromFlag(flag, name);
+                if (colony) {
+                    colony.initRoles(1);
+                    this.colonies.push(colony);
+                    flag.remove();
+                    remoteFlag?.remove();
+                }
             }
         }
     }
@@ -149,19 +154,9 @@ export class Empire {
     }
 
     public findUpgradeFlags(): Flag | null{
-        for (let key in Game.flags) {
-            if (Game.flags[key].name === "upgrade") {
-                return Game.flags[key];
-            }
-        }
-        return null;
+        return Game.flags["upgrade"];
     }
     public findFlags(): Flag | null {
-        for (let key in Game.flags) {
-            if (Game.flags[key].name === "newColony") {
-                return Game.flags[key];
-            }
-        }
-        return null;
+        return Game.flags["newColony"];
     }
 }

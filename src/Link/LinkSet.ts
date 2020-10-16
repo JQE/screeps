@@ -12,7 +12,7 @@ export class LinkSet {
     }
 
     private sourceId: Id<StructureLink>[] = [];
-    private destId: Id<StructureLink>;
+    public destId: Id<StructureLink>;
 
     public source?: StructureLink[] = [];
     public dest?: StructureLink | null;
