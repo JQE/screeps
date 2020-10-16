@@ -60,6 +60,7 @@ export interface RMinerMemory extends RoleMemory {
     storageId?: Id<StructureStorage>;
     linkId?: Id<StructureLink>;
     useLink: boolean;
+    checkedLink: boolean;
 }
 
 export interface MinerMemory extends RoleMemory {

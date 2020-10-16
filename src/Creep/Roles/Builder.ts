@@ -231,22 +231,9 @@ export class Builder extends Role {
                 this.site = site;
                 this.siteId = site.id;
             } else {
+                let towers = this.creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {filter: (tower:StructureTower) => tower.structureType === STRUCTURE_TOWER});
                 let repair = null;
-                Memory.repair.sort((a, b) => {
-                    if (a.assigned < b.assigned) return -1;
-                    if (a.assigned > b.assigned) return 1;
-                    if (a.hits < b.hits) return -1;
-                    if (a.hits > b.hits) return 1;
-                    return 0;
-                });
-                for (let key in Memory.repair) {
-                    if (Memory.repair[key].assigned <= 0) {
-                        repair = Memory.repair[key];
-                        Memory.repair[key].assigned = 1;
-                        break;
-                    }
-                }
-                if (!repair && Memory.repair.length > 0) {
+                if (!towers) {
                     Memory.repair.sort((a, b) => {
                         if (a.assigned < b.assigned) return -1;
                         if (a.assigned > b.assigned) return 1;
@@ -254,8 +241,24 @@ export class Builder extends Role {
                         if (a.hits > b.hits) return 1;
                         return 0;
                     });
-                    repair = Memory.repair[0];
-                    Memory.repair[0].assigned++;
+                    for (let key in Memory.repair) {
+                        if (Memory.repair[key].assigned <= 0) {
+                            repair = Memory.repair[key];
+                            Memory.repair[key].assigned = 1;
+                            break;
+                        }
+                    }
+                    if (!repair && Memory.repair.length > 0) {
+                        Memory.repair.sort((a, b) => {
+                            if (a.assigned < b.assigned) return -1;
+                            if (a.assigned > b.assigned) return 1;
+                            if (a.hits < b.hits) return -1;
+                            if (a.hits > b.hits) return 1;
+                            return 0;
+                        });
+                        repair = Memory.repair[0];
+                        Memory.repair[0].assigned++;
+                    }
                 }
                 if (repair) {
                     this.structureId = repair.structureId;

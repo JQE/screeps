@@ -12,6 +12,7 @@ export class RMiner extends Role {
         miner.storageId = memory.storageId;
         miner.linkId = memory.linkId;
         miner.useLink = memory.useLink;
+        miner.checkedLink = memory.checkedLink;
         return miner;
     }
 
@@ -37,6 +38,7 @@ export class RMiner extends Role {
     private link?: StructureLink | null;
     private parentRoom?: Room | null;
     private useLink: boolean = true;
+    private checkedLink : boolean = false;
 
     protected onLoad(): void {
         if (this.sourceId) {
@@ -80,7 +82,6 @@ export class RMiner extends Role {
            if (this.working) {
                 if (this.creep.store.getFreeCapacity(RESOURCE_ENERGY) <= 0) {
                     this.working = false;
-                    this.arrived = false;
                     delete this.sourceId;
                 } else {
                     if (!this.arrived && this.creep.room.name === this.targetRoom) {
@@ -93,10 +94,11 @@ export class RMiner extends Role {
            } else {
                 if (this.creep.store.getUsedCapacity(RESOURCE_ENERGY) <= 0) {
                     this.working = true;
-                    this.arrived = false;
                     delete this.depositId;
+                    delete this.link;
+                    this.checkedLink = false;
                 } else {
-                    if (!this.deposit) {
+                    if (!this.deposit && !this.link && (!this.checkedLink || (this.checkedLink && this.storage))) {
                         this.findDepositTarget();
                     }
                 }
@@ -145,32 +147,34 @@ export class RMiner extends Role {
         if (this.creep) {
             var link = null;
             let range = 10000;
-            if (this.parentRoom?.memory.linkDepositId) {
-                for (let key in this.parentRoom.memory.linkDepositId) {
-                    let depositId = this.parentRoom.memory.linkDepositId[key];
-                    let deposit = Game.getObjectById(depositId);
-                    if (deposit) {
-                        let checkRange = this.creep.pos.getRangeTo(deposit);
-                        if (checkRange < range) {
-                            range = checkRange;
-                            link = deposit;
+            if (!this.checkedLink && !this.arrived) {
+                if (this.parentRoom?.memory.linkDepositId) {
+                    for (let key in this.parentRoom.memory.linkDepositId) {
+                        let depositId = this.parentRoom.memory.linkDepositId[key];
+                        let deposit = Game.getObjectById(depositId);
+                        if (deposit) {
+                            let checkRange = this.creep.pos.getRangeTo(deposit);
+                            if (checkRange < range) {
+                                range = checkRange;
+                                link = deposit;
+                            }
                         }
                     }
                 }
-            }
-            if (link) {
-                this.link = link;
-                this.linkId = link.id;
+                this.checkedLink = true;
             }
             if (this.parentRoom && this.parentRoom.storage && this.parentRoom.storage.store.getFreeCapacity(RESOURCE_ENERGY) >= 50) {
                 this.storage = this.parentRoom.storage;
                 this.storageId = this.parentRoom.storage.id;
-                if (this.creep.room.name === this.targetRoom && range > this.creep.pos.getRangeTo(this.storage)) {
-                    delete this.link;
-                    delete this.linkId;
-                    this.useLink = false;
-                } else if (this.creep.room.name === this.targetRoom && range < this.creep.pos.getRangeTo(this.storage)) {
-                    this.useLink = true;
+                if (link) {
+                    let checkRange = this.creep.pos.getRangeTo(this.storage);
+                    if (checkRange > range) {
+                        this.link = link;
+                        this.linkId = link.id;
+                        this.useLink = true;
+                    } else {
+                        this.useLink = false;
+                    }
                 }
             } else {
                 var structure = this.creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
@@ -213,6 +217,7 @@ export class RMiner extends Role {
         mem.storageId = this.storageId;
         mem.linkId = this.linkId;
         mem.useLink = this.useLink;
+        mem.checkedLink = this.checkedLink;
         return mem;
     }
 }
