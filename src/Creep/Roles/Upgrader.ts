@@ -1,4 +1,5 @@
 import { Role } from "Creep/Templates/Role";
+import { Empire } from "Empire/Empire";
 import { UpgraderMemory } from "jqe-memory";
 
 export class Upgrader extends Role {
@@ -103,34 +104,52 @@ export class Upgrader extends Role {
 
     protected onExecute(): void {
         if (this.creep) {
-            if (this.working) {
-                if (this.tombstone) {
-                    if (this.creep.withdraw(this.tombstone, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                        this.creep.travelTo(this.tombstone);
-                    }
-                } else if (this.resource) {
-                    if (this.creep.pickup(this.resource) === ERR_NOT_IN_RANGE) {
-                        this.creep.travelTo(this.resource);
-                    }
-                } else if (this.storage) {
-                    if (this.creep.withdraw(this.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                        this.creep.travelTo(this.storage);
-                    }
-                } else if (this.container) {
-                    if (this.creep.withdraw(this.container, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                        this.creep.travelTo(this.container);
-                    }
-                } else if (this.source) {
-                    if (this.creep.harvest(this.source) === ERR_NOT_IN_RANGE) {
-                        if (this.creep.travelTo(this.source) === ERR_NO_PATH) {
-                            delete this.sourceId;
+            if (!this.source && this.creep.room.memory.colonyName !== this.creep.memory.colony) {
+                let colony = (global.empire as Empire).getColonyByName(this.creep.memory.colony);
+                if (colony) {
+                    console.log("have colony :"+colony.roomName);
+                    let room = Game.rooms[colony.roomName];
+                    if (room) {
+                        console.log("got room");
+                        let sources = room.find(FIND_SOURCES_ACTIVE);
+                        if (sources && sources.length > 0) {
+                            this.source = sources[0];
+                            this.sourceId = this.source.id;
+                            console.log("have source");
+                            this.creep.travelTo(this.source);
                         }
                     }
                 }
             } else {
-                if (this.controller) {
-                    if (this.creep.upgradeController(this.controller) == ERR_NOT_IN_RANGE) {
-                        this.creep.travelTo(this.controller);
+                if (this.working) {
+                    if (this.tombstone) {
+                        if (this.creep.withdraw(this.tombstone, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+                            this.creep.travelTo(this.tombstone);
+                        }
+                    } else if (this.resource) {
+                        if (this.creep.pickup(this.resource) === ERR_NOT_IN_RANGE) {
+                            this.creep.travelTo(this.resource);
+                        }
+                    } else if (this.storage) {
+                        if (this.creep.withdraw(this.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                            this.creep.travelTo(this.storage);
+                        }
+                    } else if (this.container) {
+                        if (this.creep.withdraw(this.container, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+                            this.creep.travelTo(this.container);
+                        }
+                    } else if (this.source) {
+                        if (this.creep.harvest(this.source) === ERR_NOT_IN_RANGE) {
+                            if (this.creep.travelTo(this.source) === ERR_NO_PATH) {
+                                delete this.sourceId;
+                            }
+                        }
+                    }
+                } else {
+                    if (this.controller) {
+                        if (this.creep.upgradeController(this.controller) == ERR_NOT_IN_RANGE) {
+                            this.creep.travelTo(this.controller);
+                        }
                     }
                 }
             }

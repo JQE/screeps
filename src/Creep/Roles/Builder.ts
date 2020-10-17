@@ -1,5 +1,6 @@
 import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from "constants";
 import { Role } from "Creep/Templates/Role";
+import { Empire } from "Empire/Empire";
 import { BuilderMemory } from "jqe-memory";
 
 export class Builder extends Role {
@@ -13,6 +14,7 @@ export class Builder extends Role {
         builder.structureId = memory.structureId;
         builder.controllerId = memory.controllerId;
         builder.storageId = memory.storageId;
+        builder.roomPosition = memory.roomPosition;
         return builder;
     }
 
@@ -28,6 +30,7 @@ export class Builder extends Role {
     private structureId?: Id<Structure>;
     private controllerId?: Id<StructureController>;
     private storageId?: Id<StructureStorage>;
+    private roomPosition?: RoomPosition;
 
     private source?: Source | null;
     private tombstone?: Tombstone | null;
@@ -69,13 +72,13 @@ export class Builder extends Role {
                 delete this.siteId;
             }
         }
-        if (this.structureId) {
+        if (this.structureId && this.creep) {
             this.structure = Game.getObjectById(this.structureId);
             if (!this.structure || this.structure.hits == this.structure.hitsMax) {
-                for (let index in Memory.repair) {
-                    if (Memory.repair[index].structureId === this.structureId) {
-                        Memory.repair[index].assigned--;
-                        if (Memory.repair[index].assigned < 0) Memory.repair[index].assigned = 0;
+                for (let index in Memory.repair["Colony "+this.creep.room.name]) {
+                    if (Memory.repair["Colony "+this.creep.room.name][index].structureId === this.structureId) {
+                        Memory.repair["Colony "+this.creep.room.name][index].assigned--;
+                        if (Memory.repair["Colony "+this.creep.room.name][index].assigned < 0) Memory.repair["Colony "+this.creep.room.name][index].assigned = 0;
                         break;
                     }
                 }
@@ -115,10 +118,10 @@ export class Builder extends Role {
                 if (this.creep.store.getUsedCapacity(RESOURCE_ENERGY) <= 0) {
                     this.working = true;
                     delete this.siteId;
-                    for (let index in Memory.repair) {
-                        if (Memory.repair[index].structureId === this.structureId) {
-                            Memory.repair[index].assigned--;
-                            if (Memory.repair[index].assigned < 0) Memory.repair[index].assigned = 0;
+                    for (let index in Memory.repair["Colony "+this.creep.room.name]) {
+                        if (Memory.repair["Colony "+this.creep.room.name][index].structureId === this.structureId) {
+                            Memory.repair["Colony "+this.creep.room.name][index].assigned--;
+                            if (Memory.repair["Colony "+this.creep.room.name][index].assigned < 0) Memory.repair["Colony "+this.creep.room.name][index].assigned = 0;
                             break;
                         }
                     }
@@ -135,42 +138,60 @@ export class Builder extends Role {
 
     protected onExecute(): void {
         if (this.creep) {
-            if (this.working) {
-                if (this.tombstone) {
-                    if (this.creep.withdraw(this.tombstone, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                        this.creep.travelTo(this.tombstone);
-                    }
-                } else if (this.resource) {
-                    if (this.creep.pickup(this.resource) === ERR_NOT_IN_RANGE) {
-                        this.creep.travelTo(this.resource);
-                    }
-                } else if (this.storage) {
-                    if (this.creep.withdraw(this.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                        this.creep.travelTo(this.storage);
-                    }
-                } else if (this.container) {
-                    if (this.creep.withdraw(this.container, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                        this.creep.travelTo(this.container);
-                    }
-                } else if (this.source) {
-                    if (this.creep.harvest(this.source) === ERR_NOT_IN_RANGE) {
-                        if (this.creep.travelTo(this.source) === ERR_NO_PATH) {
-                            delete this.sourceId;
+            if (!this.source && this.creep.room.memory.colonyName !== this.creep.memory.colony) {
+                let colony = (global.empire as Empire).getColonyByName(this.creep.memory.colony);
+                if (colony) {
+                    console.log("have colony");
+                    let room = Game.rooms[colony.roomName];
+                    if (room) {
+                        console.log("got room");
+                        let sources = room.find(FIND_SOURCES_ACTIVE);
+                        if (sources && sources.length > 0) {
+                            this.source = sources[0];
+                            this.sourceId = this.source.id;
+                            console.log("have source");
+                            this.creep.travelTo(this.source);
                         }
                     }
                 }
             } else {
-                if (this.site) {
-                    if (this.creep.build(this.site) === ERR_NOT_IN_RANGE) {
-                        this.creep.travelTo(this.site);
+                if (this.working) {
+                    if (this.tombstone) {
+                        if (this.creep.withdraw(this.tombstone, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+                            this.creep.travelTo(this.tombstone);
+                        }
+                    } else if (this.resource) {
+                        if (this.creep.pickup(this.resource) === ERR_NOT_IN_RANGE) {
+                            this.creep.travelTo(this.resource);
+                        }
+                    } else if (this.storage) {
+                        if (this.creep.withdraw(this.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                            this.creep.travelTo(this.storage);
+                        }
+                    } else if (this.container) {
+                        if (this.creep.withdraw(this.container, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+                            this.creep.travelTo(this.container);
+                        }
+                    } else if (this.source) {
+                        if (this.creep.harvest(this.source) === ERR_NOT_IN_RANGE) {
+                            if (this.creep.travelTo(this.source) === ERR_NO_PATH) {
+                                delete this.sourceId;
+                            }
+                        }
                     }
-                } else if (this.structure) {
-                    if (this.creep.repair(this.structure) === ERR_NOT_IN_RANGE) {
-                        this.creep.travelTo(this.structure);
-                    }
-                } else if (this.controller) {
-                    if(this.creep.upgradeController(this.controller) == ERR_NOT_IN_RANGE) {
-                        this.creep.travelTo(this.controller);
+                } else {
+                    if (this.site) {
+                        if (this.creep.build(this.site) === ERR_NOT_IN_RANGE) {
+                            this.creep.travelTo(this.site);
+                        }
+                    } else if (this.structure) {
+                        if (this.creep.repair(this.structure) === ERR_NOT_IN_RANGE) {
+                            this.creep.travelTo(this.structure);
+                        }
+                    } else if (this.controller) {
+                        if(this.creep.upgradeController(this.controller) == ERR_NOT_IN_RANGE) {
+                            this.creep.travelTo(this.controller);
+                        }
                     }
                 }
             }
@@ -234,30 +255,30 @@ export class Builder extends Role {
                 let towers = this.creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {filter: (tower:StructureTower) => tower.structureType === STRUCTURE_TOWER});
                 let repair = null;
                 if (!towers) {
-                    Memory.repair.sort((a, b) => {
+                    Memory.repair["Colony "+this.creep.room.name].sort((a, b) => {
                         if (a.assigned < b.assigned) return -1;
                         if (a.assigned > b.assigned) return 1;
                         if (a.hits < b.hits) return -1;
                         if (a.hits > b.hits) return 1;
                         return 0;
                     });
-                    for (let key in Memory.repair) {
-                        if (Memory.repair[key].assigned <= 0) {
-                            repair = Memory.repair[key];
-                            Memory.repair[key].assigned = 1;
+                    for (let key in Memory.repair["Colony "+this.creep.room.name]) {
+                        if (Memory.repair["Colony "+this.creep.room.name][key].assigned <= 0) {
+                            repair = Memory.repair["Colony "+this.creep.room.name][key];
+                            Memory.repair["Colony "+this.creep.room.name][key].assigned = 1;
                             break;
                         }
                     }
-                    if (!repair && Memory.repair.length > 0) {
-                        Memory.repair.sort((a, b) => {
+                    if (!repair && Memory.repair["Colony "+this.creep.room.name].length > 0) {
+                        Memory.repair["Colony "+this.creep.room.name].sort((a, b) => {
                             if (a.assigned < b.assigned) return -1;
                             if (a.assigned > b.assigned) return 1;
                             if (a.hits < b.hits) return -1;
                             if (a.hits > b.hits) return 1;
                             return 0;
                         });
-                        repair = Memory.repair[0];
-                        Memory.repair[0].assigned++;
+                        repair = Memory.repair["Colony "+this.creep.room.name][0];
+                        Memory.repair["Colony "+this.creep.room.name][0].assigned++;
                     }
                 }
                 if (repair) {
@@ -272,6 +293,23 @@ export class Builder extends Role {
             }
         }
     }
+    public borderPosition(): DirectionConstant | number {
+        if (this.creep) {
+            if (this.creep.pos.x === 0) {
+                return RIGHT;
+            }
+            if (this.creep.pos.x === 49) {
+                return LEFT;
+            }
+            if (this.creep.pos.y === 0) {
+                return TOP;
+            }
+            if (this.creep.pos.y === 49) {
+                return BOTTOM;
+            }
+        }
+        return -1;
+    }
 
     public Save(): BuilderMemory {
         let mem = super.Save() as BuilderMemory;
@@ -283,6 +321,7 @@ export class Builder extends Role {
         mem.structureId = this.structureId;
         mem.controllerId = this.controllerId;
         mem.storageId = this.storageId;
+        mem.roomPosition = this.roomPosition;
         return mem;
     }
 }

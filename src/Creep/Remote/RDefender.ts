@@ -34,7 +34,7 @@ export class RDefender extends Role {
        if (this.coreId) {
            this.core = Game.getObjectById(this.coreId);
        }
-       let flag = Game.flags["muster "+this.targetRoom];
+       let flag = Game.flags["muster "+this.hq+" "+this.targetRoom];
         if (flag) {
             this.flag = flag;
         }

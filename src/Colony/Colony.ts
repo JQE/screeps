@@ -10,6 +10,8 @@ import { Population } from "./Population";
 import { Remote } from "./Remote";
 import * as _ from 'lodash';
 import { Runner } from "Creep/Roles/Runner";
+import { Empire } from "Empire/Empire";
+import { measureMemory } from "vm";
 
 export class Colony {
     public static fromMemory(memory: ColonyMemory): Colony {
@@ -104,6 +106,17 @@ export class Colony {
     public newColonyName?: string;
 
     public Load(): void {
+        this.room = Game.rooms[this.roomName];
+        if (this.room) {
+            this.room.memory.colonyName = this.name;
+        }
+        if ((this.level === 1 || this.level === 2) && this.population.getCreepCount() < 2) {
+            let spawnCount = this.room.find(FIND_STRUCTURES, {filter: (spawn:StructureSpawn) => spawn.structureType === STRUCTURE_SPAWN && spawn.room.name === this.roomName});
+            if (spawnCount.length < 1) {
+                console.log("requesting help");
+                this.getHelp();
+            }
+        }
         if (this.level === 4 && this.roleLimits[ROLE_HAULER] < 2) {
             this.checkStorage();
         }
@@ -125,7 +138,12 @@ export class Colony {
             console.log("Setting room level to : "+this.room.controller.level);
             this.initRoles(this.room.controller.level);
         }
-        this.getSpots();
+        if (this.level > 1) {
+            let spawnCount = this.room.find(FIND_STRUCTURES, {filter: (spawn:StructureSpawn) => spawn.structureType === STRUCTURE_SPAWN && spawn.room.name === this.roomName});
+            if (spawnCount.length > 0) {
+                this.getSpots();
+            }
+        }
         this.population.Load();
         for (let key in this.spawners) {
             let spawner = this.spawners[key];
@@ -329,7 +347,7 @@ export class Colony {
             let gpro = gclp/ 10;
             let gclText = "GCL Level "+Game.gcl.level+" Upgrading: "+gclp+"%";
             let spawnText = "Spawn Q :"+this.population.spawnQueue.length;
-            let repairText = "Repair Q :"+Memory.repair.length;
+            let repairText = "Repair Q :"+Memory.repair[this.name].length;
             visual.text(text, 2, 2, { align: "left", opacity: 0.8})
                 .rect(2,2.3,10,0.8, {fill: 'transparent', stroke: '#ffffff'})
                 .rect(2,2.3,progress,0.8, {fill: '#008000'})
@@ -338,6 +356,19 @@ export class Colony {
                 .rect(2,4.3,gpro,0.8, {fill: '#008000'})
                 .text(spawnText, 2,6,{align: "left", opacity: 0.8})
                 .text(repairText, 7,6,{align: "left", opacity: 0.8});
+        }
+    }
+
+    public getHelp(): void {
+        let colony = (global.empire as Empire).colonies[0];
+        if (colony) {
+            console.log("have colony");
+            if (colony.name === this.name) {
+                console.log("got myself");
+            } else {
+                console.log("requesting creep");
+                colony.requestCreep(this.name);
+            }
         }
     }
 
@@ -400,7 +431,7 @@ export class Colony {
                     let room = flag.room;
                     let pos = new RoomPosition(flag.pos.x, flag.pos.y, room.name);
                     flag.remove();
-                    room.createFlag(pos.x, pos.y, "muster "+room.name);
+                    room.createFlag(pos.x, pos.y, "muster "+this.name+" "+room.name);
                     let remote = new Remote("Remote "+room.name, room.name, this.room.name, this);
                     remote.Init();
                     this.population.addRemote();
@@ -409,7 +440,7 @@ export class Colony {
                     scoutLocations++;
                 }
             }
-            if (flag.name.startsWith("muster")) {
+            if (flag.name.startsWith("muster "+this.name)) {
                 scoutLocations++;
             }
         }
@@ -599,6 +630,10 @@ export class Colony {
         }
     }
 
+    public requestCreep(colonyName: string) {
+        this.population.spawnNeighborCreep(colonyName);
+    }
+
     public removeRemote(roomName: string): void {
         let index = -1;
         for (let i = 0; i < this.remotes.length; i++) {
@@ -636,6 +671,12 @@ export class Colony {
     }
 
     public findRepairStructures(): void {
+        if (!Memory.repair) {
+            Memory.repair = {};
+        }
+        if (!Memory.repair[this.name]) {
+            Memory.repair[this.name] = [];
+        }
         let repairs = this.room.find(FIND_STRUCTURES, {
             filter: (structure) => structure.hits < structure.hitsMax
         });
@@ -648,22 +689,22 @@ export class Colony {
             let repair = repairs[key];
             if (repair) {
                 let found = false;
-                for (let index in Memory.repair) {
-                    if (Memory.repair[index].structureId === repair.id) {
+                for (let index in Memory.repair[this.name]) {
+                    if (Memory.repair[this.name][index].structureId === repair.id) {
                         found = true;
-                        Memory.repair[index].hits = repair.hits;
-                        Memory.repair[index].assigned = 0;
+                        Memory.repair[this.name][index].hits = repair.hits;
+                        Memory.repair[this.name][index].assigned = 0;
                         break;
                     }
                 }
                 if (!found) {
-                    Memory.repair.push({ structureId: repair.id, assigned: 0, hits: repair.hits});
+                    Memory.repair[this.name].push({ structureId: repair.id, assigned: 0, hits: repair.hits});
                 }
             }
         }
         let downList = [];
-        for (let key in Memory.repair) {
-            let repair = Memory.repair[key];
+        for (let key in Memory.repair[this.name]) {
+            let repair = Memory.repair[this.name][key];
             if (repair) {
                 let test = Game.getObjectById(repair.structureId);
                 if (!test || test.hits === test.hitsMax) {
@@ -673,8 +714,8 @@ export class Colony {
         }
         for (let key in downList) {
             let repair = downList[key];
-            let index = Memory.repair.indexOf(repair);
-            Memory.repair.splice(index, 1);
+            let index = Memory.repair[this.name].indexOf(repair);
+            Memory.repair[this.name].splice(index, 1);
         }
     }
 

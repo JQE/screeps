@@ -73,14 +73,14 @@ export class Mechanic extends Role {
                 delete this.siteId;
             }
         }
-        if (this.structureId) {
+        if (this.structureId && this.creep) {
             this.structure = Game.getObjectById(this.structureId);
             if (!this.structure || this.structure.hits == this.structure.hitsMax) {
                 delete this.structureId;
             } else {
-                for (let index in Memory.repair) {
-                    if (Memory.repair[index].structureId === this.structureId) {
-                        Memory.repair[index].assigned++;
+                for (let index in Memory.repair["Colony "+this.creep.room.name]) {
+                    if (Memory.repair["Colony "+this.creep.room.name][index].structureId === this.structureId) {
+                        Memory.repair["Colony "+this.creep.room.name][index].assigned++;
                         break;
                     }
                 }
@@ -242,30 +242,30 @@ export class Mechanic extends Role {
                 this.deposit = tower;
             } else {
                 let repair = null;
-                Memory.repair.sort((a, b) => {
+                Memory.repair["Colony "+this.creep.room.name].sort((a, b) => {
                     if (a.assigned < b.assigned) return -1;
                     if (a.assigned > b.assigned) return 1;
                     if (a.hits < b.hits) return -1;
                     if (a.hits > b.hits) return 1;
                     return 0;
                 });
-                for (let key in Memory.repair) {
-                    if (Memory.repair[key].assigned <= 0) {
-                        repair = Memory.repair[key];
-                        Memory.repair[key].assigned = 1;
+                for (let key in Memory.repair["Colony "+this.creep.room.name]) {
+                    if (Memory.repair["Colony "+this.creep.room.name][key].assigned <= 0) {
+                        repair = Memory.repair["Colony "+this.creep.room.name][key];
+                        Memory.repair["Colony "+this.creep.room.name][key].assigned = 1;
                         break;
                     }
                 }
-                if (!repair && Memory.repair.length > 0) {
-                    Memory.repair.sort((a, b) => {
+                if (!repair && Memory.repair["Colony "+this.creep.room.name].length > 0) {
+                    Memory.repair["Colony "+this.creep.room.name].sort((a, b) => {
                         if (a.assigned < b.assigned) return -1;
                         if (a.assigned > b.assigned) return 1;
                         if (a.hits < b.hits) return -1;
                         if (a.hits > b.hits) return 1;
                         return 0;
                     });
-                    repair = Memory.repair[0];
-                    Memory.repair[0].assigned++;
+                    repair = Memory.repair["Colony "+this.creep.room.name][0];
+                    Memory.repair["Colony "+this.creep.room.name][0].assigned++;
                 }
                 if (repair) {
                     this.structureId = repair.structureId;

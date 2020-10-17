@@ -29,7 +29,7 @@ export class RClaimer extends Role {
                 delete this.controllerId;
             }
         }
-        let flag = Game.flags["muster "+this.targetRoom];
+        let flag = Game.flags["muster "+this.hq+" "+this.targetRoom];
         if (flag) {
             this.flag = flag;
         }

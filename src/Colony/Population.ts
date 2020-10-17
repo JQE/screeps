@@ -2,6 +2,7 @@ import { BodyRepository } from "Creep/Body/BodyRepository";
 import { PopulationMemory } from "jqe-memory";
 import { SpawnRequest } from "Spawn/SpawnRequest";
 import * as _ from 'lodash';
+import profiler from "screeps-profiler";
 
 export class Population {
     public static fromMemory(memory: PopulationMemory): Population {
@@ -94,12 +95,43 @@ export class Population {
 
     }
 
+    public getCreepCount(): number {
+        return _.sumBy(_.map(Game.creeps), (creep:Creep) => (creep.memory.colony === this.colonyName) ? 1: 0);
+    }
+
+    public spawnNeighborCreep(colonyName: string): void {
+        let count = 0;
+        for(let key in Game.creeps) {
+            let creep = Game.creeps[key];
+            if (creep.memory.colony === colonyName) {
+                count++;
+            }
+        }
+        console.log(count);
+        for(let key in this.spawnQueue) {
+            let req = this.spawnQueue[key];
+            if (req.colonyName === colonyName) {
+                count++;
+            }
+        }
+        console.log(count);
+        if (count < 2) {
+            var body = BodyRepository.getBody(BODY_LIGHT_WORKER, this.spawnHeavy);
+            if (body) {
+                console.log("Spawning lightworker with colony: "+colonyName);
+                let req = new SpawnRequest("lightworker "+Game.time, 10, body, Game.time+1, colonyName);
+                var index = _.sortedIndexBy(this.spawnQueue, req, (p) => p.priority * -10000 - p.age);
+                this.spawnQueue.splice(index, 0, req);
+            }
+        }
+    }
+
     public getNewCreep(): SpawnRequest | null {
         return this.spawnQueue[0] ? this.spawnQueue[0] : null;
     }
 
     public getCreep(type: BodyType): Creep | null {
-        var creeps = _.filter(Game.creeps, (creep) => (creep.memory.role === undefined || creep.memory.role === null) && creep.memory.body === type);
+        var creeps = _.filter(Game.creeps, (creep) => (creep.memory.role === undefined || creep.memory.role === null) && creep.memory.body === type && creep.memory.colony === this.colonyName);
         if (creeps && creeps[0]) {
             return creeps[0];
         }

@@ -68,7 +68,7 @@ export class RMiner extends Role {
         if (this.parentRoomName) {
             this.parentRoom = Game.rooms[this.parentRoomName];
         }
-        let flag = Game.flags["muster "+this.targetRoom];
+        let flag = Game.flags["muster "+this.parentRoomName+" "+this.targetRoom];
         if (flag) {
             this.roomFlag = flag;
         }

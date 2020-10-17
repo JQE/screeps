@@ -95,6 +95,7 @@ export interface BuilderMemory extends RoleMemory {
     resourceId?: Id<Resource>;
     containerId?: Id<StructureContainer>;
     storageId?: Id<StructureStorage>;
+    roomPosition?: RoomPosition;
 
     structureId?: Id<Structure>;
     siteId?: Id<ConstructionSite>;

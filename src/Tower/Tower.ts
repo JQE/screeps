@@ -45,20 +45,20 @@ export class Tower {
                 this.enemyId = this.enemy.id;
             } else {
                 let repair = null;
-                Memory.repair.sort((a, b) => {
+                Memory.repair["Colony "+this.tower.room.name].sort((a, b) => {
                     if (a.assigned < b.assigned) return -1;
                     if (a.assigned > b.assigned) return 1;
                     if (a.hits < b.hits) return -1;
                     if (a.hits > b.hits) return 1;
                     return 0;
                 });
-                repair = Memory.repair[0];
-                Memory.repair[0].assigned++;
+                repair = Memory.repair["Colony "+this.tower.room.name][0];
+                Memory.repair["Colony "+this.tower.room.name][0].assigned++;
                 this.structure = Game.getObjectById(repair.structureId);
                 if (this.structure) {
                     this.structureId = repair.structureId;
                 } else {
-                    Memory.repair[0].assigned--;
+                    Memory.repair["Colony "+this.tower.room.name][0].assigned--;
                 }
             }
         }
@@ -73,9 +73,9 @@ export class Tower {
     }
 
     public Cleanup(): void {
-        for (let key in Memory.repair) {
-            if (Memory.repair[key].structureId === this.structureId) {
-                Memory.repair[key].assigned--;
+        for (let key in Memory.repair["Colony "+this.tower.room.name]) {
+            if (Memory.repair["Colony "+this.tower.room.name][key].structureId === this.structureId) {
+                Memory.repair["Colony "+this.tower.room.name][key].assigned--;
                 break;
             }
         }

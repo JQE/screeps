@@ -31,7 +31,7 @@ interface Memory {
   uuid: number;
   log: any;
   empire: any;
-  repair: RepairItem[];
+  repair: { [colonyName: string]: RepairItem[]};
 }
 
 interface PathfinderReturn {
